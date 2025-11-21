@@ -1,9 +1,10 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { db } from "../config/db.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType as Type } from "@google/generative-ai";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
+import type { AIInsight } from "../types/user.js";
 
 const getAIClient = () => {
   const apiKey = process.env.API_KEY;
@@ -15,26 +16,52 @@ const getAIClient = () => {
   return genAI;
 };
 
-export const getInsights = asyncHandler(async (req: Request, res: Response) => {
-  const uid = (req as any).uid;
+export const getInsights = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const uid = (req as any).uid;
 
-  const [rows] = await db.query(
-    "SELECT recommendations FROM users WHERE uid = ?",
-    [uid]
-  );
+    const [rows] = await db.query(
+      "SELECT recommendations FROM users WHERE uid = ?",
+      [uid]
+    );
 
-  const user = (rows as any[])[0];
-  const recs = JSON.parse(user?.recommendations || "[]");
+    const user = (rows as any[])[0];
+    const recs = JSON.parse(user?.recommendations || "[]");
 
-  return res.status(200).json(new ApiResponse(200, recs, "Insights fetched"));
-});
+    return res.status(200).json(new ApiResponse(200, recs, "Insights fetched"));
+  }
+);
 
 export const generateInsights = asyncHandler(
-  async (req: Request, res: Response) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const uid = (req as any).uid;
 
     const model = getAIClient().getGenerativeModel({
       model: "gemini-2.5-flash",
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            insights: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+            },
+            suggestedSchedule: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  time: { type: Type.STRING },
+                  activity: { type: Type.STRING },
+                  note: { type: Type.STRING },
+                },
+              },
+            },
+            productivityScore: { type: Type.NUMBER },
+          },
+        },
+      },
     });
 
     const [rows] = await db.query(
@@ -70,9 +97,9 @@ export const generateInsights = asyncHandler(
     `;
 
     const response = await model.generateContent(prompt);
-    const aiText = response.response.text().trim();
+    const aiData = JSON.parse(response.response.text());
 
-    let recs: string[] = [];
+    let recs: any[] = [];
 
     if (user?.recommendations) {
       recs = JSON.parse(user.recommendations);
@@ -81,19 +108,33 @@ export const generateInsights = asyncHandler(
     if (recs.length >= 10) {
       recs.shift();
     }
-    recs.push(aiText);
+    recs.push(aiData);
 
     await db.query("UPDATE users SET recommendations = ? WHERE uid = ?", [
       JSON.stringify(recs),
       uid,
     ]);
 
-    return res.json(
-      new ApiResponse(
-        200,
-        { recommendation: aiText, insights: recs },
-        "New insight generated"
-      )
+    return res.json(new ApiResponse(200, aiData, "New insight generated"));
+  }
+);
+
+export const getQuickAdvice = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { query, context } = req.body;
+
+    const model = getAIClient().getGenerativeModel({
+      model: "gemini-2.5-flash",
+    });
+
+    const response = await model.generateContent(
+      `Context: ${context}. \n\nUser Question: ${query}\n\nAnswer concisely in 2 sentences.`
     );
+
+    const text = response.response.text();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, text, "Response generated"));
   }
 );

@@ -1,13 +1,12 @@
-
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = "http://localhost:5000/api/v1";
 
 export const getAuthHeaders = () => {
-  const token = localStorage.getItem('studentflow_token');
+  const token = localStorage.getItem("token");
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+    headers["Authorization"] = `Bearer ${token}`;
   }
   return headers;
 };
@@ -15,13 +14,14 @@ export const getAuthHeaders = () => {
 const handleResponse = async (res: Response) => {
   if (!res.ok) {
     if (res.status === 401) {
-      window.dispatchEvent(new Event('auth-error'));
+      window.dispatchEvent(new Event("auth-error"));
     }
-    
+
     let errorMessage = res.statusText;
     try {
       const errorBody = await res.json();
-      errorMessage = errorBody.error || errorBody.message || JSON.stringify(errorBody);
+      errorMessage =
+        errorBody.error || errorBody.message || JSON.stringify(errorBody);
     } catch (e) {
       // Fallback to text if JSON parsing fails
       const text = await res.text();
@@ -35,27 +35,33 @@ const handleResponse = async (res: Response) => {
 export const api = {
   get: async (endpoint: string) => {
     try {
-      const res = await fetch(`${API_BASE}${endpoint}`, { headers: getAuthHeaders() });
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        headers: getAuthHeaders(),
+      });
       return handleResponse(res);
     } catch (error: any) {
-      if (error.message === 'Failed to fetch') {
-        throw new Error('Cannot connect to server. Is backend running on port 5000?');
+      if (error.message === "Failed to fetch") {
+        throw new Error(
+          "Cannot connect to server. Is backend running on port 5000?"
+        );
       }
       throw error;
     }
   },
-  
+
   post: async (endpoint: string, body: any) => {
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'POST',
+        method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
       return handleResponse(res);
     } catch (error: any) {
-      if (error.message === 'Failed to fetch') {
-        throw new Error('Cannot connect to server. Is backend running on port 5000?');
+      if (error.message === "Failed to fetch") {
+        throw new Error(
+          "Cannot connect to server. Is backend running on port 5000?"
+        );
       }
       throw error;
     }
@@ -64,47 +70,53 @@ export const api = {
   put: async (endpoint: string, body: any) => {
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: getAuthHeaders(),
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
       return handleResponse(res);
     } catch (error: any) {
-      if (error.message === 'Failed to fetch') {
-        throw new Error('Cannot connect to server. Is backend running on port 5000?');
+      if (error.message === "Failed to fetch") {
+        throw new Error(
+          "Cannot connect to server. Is backend running on port 5000?"
+        );
       }
       throw error;
     }
   },
 
   patch: async (endpoint: string, body: any) => {
-      try {
-        const res = await fetch(`${API_BASE}${endpoint}`, {
-          method: 'PATCH',
-          headers: getAuthHeaders(),
-          body: JSON.stringify(body)
-        });
-        return handleResponse(res);
-      } catch (error: any) {
-        if (error.message === 'Failed to fetch') {
-          throw new Error('Cannot connect to server. Is backend running on port 5000?');
-        }
-        throw error;
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify(body),
+      });
+      return handleResponse(res);
+    } catch (error: any) {
+      if (error.message === "Failed to fetch") {
+        throw new Error(
+          "Cannot connect to server. Is backend running on port 5000?"
+        );
       }
+      throw error;
+    }
   },
 
   delete: async (endpoint: string) => {
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
+        method: "DELETE",
+        headers: getAuthHeaders(),
       });
       return handleResponse(res);
     } catch (error: any) {
-      if (error.message === 'Failed to fetch') {
-        throw new Error('Cannot connect to server. Is backend running on port 5000?');
+      if (error.message === "Failed to fetch") {
+        throw new Error(
+          "Cannot connect to server. Is backend running on port 5000?"
+        );
       }
       throw error;
     }
-  }
+  },
 };

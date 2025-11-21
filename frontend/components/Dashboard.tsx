@@ -14,7 +14,7 @@ interface DashboardProps {
 
 export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName }) => {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
-    const today = new Date();
+    const today = new Date(Date.now());
     const day = today.getDay(); 
     const diff = today.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(today.setDate(diff));

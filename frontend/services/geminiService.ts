@@ -1,17 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Task, RoutineLog, UserProfile, AIAnalysisResult } from "../types";
+import axios, { AxiosResponse } from "axios";
 
-// Using gemini-2.5-flash for fast response times suitable for UI interactions
-const MODEL_NAME = 'gemini-2.5-flash';
-
-const getAIClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    console.error("API Key is missing in environment variables");
-    throw new Error("API Key missing");
-  }
-  return new GoogleGenAI({ apiKey });
-};
+const MODEL_NAME = "gemini-2.5-flash";
+let token = "temp";
 
 export const analyzeProductivity = async (
   tasks: Task[],
@@ -19,73 +11,43 @@ export const analyzeProductivity = async (
   profile: UserProfile
 ): Promise<AIAnalysisResult> => {
   try {
-    const ai = getAIClient();
-    
-    const prompt = `
-      Act as an elite Student Productivity Coach. Analyze the following data:
-      
-      UserProfile: ${JSON.stringify(profile)}
-      Current Tasks (Pending & Completed): ${JSON.stringify(tasks)}
-      Recent Routine Logs (Last 7 days): ${JSON.stringify(logs)}
+    const response = await axios.post<{ data: AIAnalysisResult }>(
+      "http://localhost:5000/api/v1/insights/generate",
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      Provide a structured analysis containing:
-      1. 3-4 short, punchy insights about the student's habits (e.g., "You study best on days you exercise", "Screen time negatively impacts your sleep").
-      2. A suggested simplified schedule for the *current day* based on pending tasks and typical wake/sleep times. Minimize overlap. Prioritize 'Urgent' and 'High' tasks.
-      3. A productivity score (0-100) based on task completion and healthy routine habits.
-    `;
-
-    const response = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            insights: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
-            },
-            suggestedSchedule: {
-              type: Type.ARRAY,
-              items: {
-                type: Type.OBJECT,
-                properties: {
-                  time: { type: Type.STRING },
-                  activity: { type: Type.STRING },
-                  note: { type: Type.STRING }
-                }
-              }
-            },
-            productivityScore: { type: Type.NUMBER }
-          }
-        }
-      }
-    });
-
-    const result = JSON.parse(response.text || "{}");
-    return result as AIAnalysisResult;
-
+    return response.data.data as AIAnalysisResult;
   } catch (error) {
     console.error("Gemini Analysis Failed", error);
     // Fallback mock data to prevent app crash if API fails
     return {
-      insights: ["Ensure your API Key is valid to get real insights.", "Focus on high priority tasks first."],
-      suggestedSchedule: [{ time: "09:00", activity: "Check configurations", note: "System" }],
-      productivityScore: 50
+      insights: [
+        "Ensure your API Key is valid to get real insights.",
+        "Focus on high priority tasks first.",
+      ],
+      suggestedSchedule: [
+        { time: "09:00", activity: "Check configurations", note: "System" },
+      ],
+      productivityScore: 50,
     };
   }
 };
 
-export const getQuickAdvice = async (query: string, context: string): Promise<string> => {
+export const getQuickAdvice = async (
+  query: string,
+  context: string
+): Promise<string> => {
   try {
-    const ai = getAIClient();
-    const response = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: `Context: ${context}. \n\nUser Question: ${query}\n\nAnswer concisely in 2 sentences.`
-    });
-    return response.text || "I couldn't generate advice at this moment.";
+    const response = await axios.post<{ data: string }>(
+      "http://localhost:5000/api/v1/insights/chat",
+      { query, context },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data.data || "I couldn't generate advice at this moment.";
   } catch (e) {
     return "Service unavailable. Please check your connection or API key.";
   }
 };
+
+//

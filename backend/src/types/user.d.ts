@@ -5,7 +5,7 @@ export interface UserRow {
   pfp_url?: string | null;
   academic_goals?: string[];
   upcoming_exams?: { title: string; datetime: string }[];
-  recommendations?: string[];
+  recommendations?: AIInsight[];
   settings_dark_mode: 0 | 1;
   settings_color_theme: "Ocean" | "Royal" | "Sky" | "Sunset";
   created_at: string;
@@ -18,9 +18,9 @@ export interface TaskRow {
   title: string;
   deadline?: string | null;
   duration_mins: number;
-  priority: 'Low'|'Medium'|'High'|'Urgent';
-  category: 'Study'|'Health'|'Personal'|'Work'|'Other';
-  status: 'Pending'|'Completed';
+  priority: "Low" | "Medium" | "High" | "Urgent";
+  category: "Study" | "Health" | "Personal" | "Work" | "Other";
+  status: "Pending" | "Completed";
   created_at: string;
   updated_at: string;
 }
@@ -43,4 +43,14 @@ export interface RoutineLogRow {
 
   created_at: string;
   updated_at: string;
+}
+
+export interface AIInsight {
+  insights: string[];
+  suggestedSchedule: {
+    time: string;
+    activity: string;
+    note?: string;
+  }[];
+  productivityScore: number;
 }
