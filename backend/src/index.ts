@@ -1,5 +1,5 @@
 import express from "express";
-import { connectDB } from "./config/db.js";
+import { connectDB, initDB } from "./config/db.js";
 import dotenv from "dotenv";
 import cors from "cors";
 
@@ -11,6 +11,7 @@ import authRouter from "./routes/auth.route.js";
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -18,16 +19,21 @@ app.use(express.urlencoded({ extended: true }));
 
 connectDB();
 
-app.get("/api/v1", (req: Request, res: Response) => {
-  res.status(200).send("API is running 🚀");
-});
+const start = async () => {
+  await connectDB();
+  await initDB();
 
-app.use("/api/v1/auth", authRouter);
+  app.get("/api/v1", (req: Request, res: Response) => {
+    res.status(200).send("API is running 🚀");
+  });
 
-app.use(errorMiddleware);
+  app.use("/api/v1/auth", authRouter);
 
-const PORT = process.env.PORT || 5000;
+  app.use(errorMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port: ${PORT}`);
-});
+  app.listen(PORT, () => {
+    console.log(`Server running on port: ${PORT}`);
+  });
+}
+
+start();
