@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { BookOpen, ArrowRight, Loader2 } from 'lucide-react';
 
@@ -7,6 +8,7 @@ interface AuthPageProps {
 }
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
+  const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
@@ -16,15 +18,20 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
-      const endpoint = isRegister ? '/auth/register' : '/auth/login';
-      const res = await api.post(endpoint, formData);
-      
-      localStorage.setItem('studentflow_token', res.token);
+      let res;
+      if (isRegister) {
+        res = await api.post('/auth/register', formData);
+      } else {
+        res = await api.post('/auth/login', { email: formData.email, password: formData.password });
+      }
+
+      localStorage.setItem('token', res.token);
       onLogin();
+      navigate('/dashboard');
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setError(err.response?.data?.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -35,7 +42,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
       <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl w-full max-w-md border border-slate-100 dark:border-slate-700 animate-fade-in">
         <div className="text-center mb-8">
           <div className="inline-flex bg-violet-600 text-white p-3 rounded-2xl mb-4 shadow-lg shadow-violet-200 dark:shadow-none">
-             <BookOpen size={32} strokeWidth={2.5} />
+            <BookOpen size={32} strokeWidth={2.5} />
           </div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">StudentFlow</h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2">AI-Powered Academic Productivity</p>
@@ -56,11 +63,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
                 required
                 className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-violet-500 outline-none dark:text-white transition-all"
                 value={formData.name}
-                onChange={e => setFormData({...formData, name: e.target.value})}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
           )}
-          
+
           <div>
             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Email Address</label>
             <input
@@ -68,7 +75,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
               required
               className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-violet-500 outline-none dark:text-white transition-all"
               value={formData.email}
-              onChange={e => setFormData({...formData, email: e.target.value})}
+              onChange={e => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
 
@@ -79,7 +86,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
               required
               className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-violet-500 outline-none dark:text-white transition-all"
               value={formData.password}
-              onChange={e => setFormData({...formData, password: e.target.value})}
+              onChange={e => setFormData({ ...formData, password: e.target.value })}
             />
           </div>
 

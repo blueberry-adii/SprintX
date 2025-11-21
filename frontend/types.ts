@@ -43,12 +43,10 @@ export interface UserProfile {
   profilePicture?: string; // Base64 string or URL
   goals: string[];
   examDates: { subject: string; date: string }[];
-}
-
-export interface AISuggestion {
-  type: 'alert' | 'schedule' | 'insight';
-  message: string;
-  actionable?: boolean;
+  settings?: {
+    darkMode: boolean;
+    theme: string;
+  };
 }
 
 export interface AIAnalysisResult {
