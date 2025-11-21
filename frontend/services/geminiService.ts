@@ -5,11 +5,8 @@ import { Task, RoutineLog, UserProfile, AIAnalysisResult } from "../types";
 const MODEL_NAME = 'gemini-2.5-flash';
 
 const getAIClient = () => {
-  const apiKey = process.env.API_KEY;
-  if (!apiKey) {
-    console.error("API Key is missing in environment variables");
-    throw new Error("API Key missing");
-  }
+  // Integrated API Key for Hackathon Project
+  const apiKey = 'AIzaSyBZGekfu3xn0yST-Q3SoQICzhYKiJ51XKA';
   return new GoogleGenAI({ apiKey });
 };
 
