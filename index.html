@@ -26,12 +26,17 @@
                 '0%': { transform: 'scale(0.8)', opacity: '0' },
                 '40%': { transform: 'scale(1.2)' },
                 '100%': { transform: 'scale(1)', opacity: '1' },
+              },
+              'slide-indeterminate': {
+                '0%': { transform: 'translateX(-100%)' },
+                '100%': { transform: 'translateX(200%)' },
               }
             },
             animation: {
               'fade-in': 'fade-in 0.5s ease-out',
               'slide-up': 'slide-up 0.5s ease-out',
               'pop': 'pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              'slide-indeterminate': 'slide-indeterminate 1.5s infinite linear',
             }
           }
         }
