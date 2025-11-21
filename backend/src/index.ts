@@ -11,6 +11,7 @@ import dashboardRouter from "./routes/dashboard.route.js";
 import taskRouter from "./routes/task.route.js";
 import routineRouter from "./routes/routine.route.js";
 import insightsRouter from "./routes/insights.route.js";
+import settingsRouter from "./routes/settings.route.js";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ const start = async () => {
   app.use("/api/v1/tasks", taskRouter);
   app.use("/api/v1/routines", routineRouter);
   app.use("/api/v1/insights", insightsRouter);
+  app.use("/api/v1/settings", settingsRouter);
 
   app.use(errorMiddleware);
 
