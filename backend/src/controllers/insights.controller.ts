@@ -3,8 +3,17 @@ import { db } from "../config/db.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+const getAIClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.error("API Key is missing in environment variables");
+    throw new ApiError(500, "API Key missing");
+  }
+  const genAI = new GoogleGenerativeAI(apiKey);
+  return genAI;
+};
 
 export const getInsights = asyncHandler(async (req: Request, res: Response) => {
   const uid = (req as any).uid;
@@ -24,20 +33,45 @@ export const generateInsights = asyncHandler(
   async (req: Request, res: Response) => {
     const uid = (req as any).uid;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = getAIClient().getGenerativeModel({
+      model: "gemini-2.5-flash",
+    });
 
-    const prompt =
-      "Generate one short, actionable productivity recommendation for a college student in one sentence only.";
+    const [rows] = await db.query(
+      "SELECT full_name, academic_goals, upcoming_exams, recommendations FROM users WHERE uid = ?",
+      [uid]
+    );
+    const user = (rows as any[])[0];
+    const profile = JSON.parse(user || "[]");
+
+    const [rows2] = await db.query(
+      "SELECT title, deadline, duration_mins, priority, category, status FROM tasks WHERE uid = ?",
+      [uid]
+    );
+    const tasks = JSON.parse((rows2 as any[])[0] || []);
+
+    const [rows3] = await db.query(
+      "SELECT log_date, felt_today, study_hours, screen_hours, exercise_mins, wake_up_time, sleep_time, wellbeing_score FROM daily_routine WHERE uid = ?",
+      [uid]
+    );
+    const logs = JSON.parse((rows3 as any[])[0] || []);
+
+    const prompt = `
+      Act as an elite Student Productivity Coach. Analyze the following data:
+      
+      UserProfile: ${JSON.stringify(profile)}
+      Current Tasks (Pending & Completed): ${JSON.stringify(tasks)}
+      Recent Routine Logs (Last 7 days): ${JSON.stringify(logs)}
+
+      Provide a structured analysis containing:
+      1. 3-4 short, punchy insights about the student's habits (e.g., "You study best on days you exercise", "Screen time negatively impacts your sleep").
+      2. A suggested simplified schedule for the *current day* based on pending tasks and typical wake/sleep times. Minimize overlap. Prioritize 'Urgent' and 'High' tasks.
+      3. A productivity score (0-100) based on task completion and healthy routine habits.
+    `;
 
     const response = await model.generateContent(prompt);
     const aiText = response.response.text().trim();
 
-    const [rows] = await db.query(
-      "SELECT recommendations FROM users WHERE uid = ?",
-      [uid]
-    );
-
-    const user = (rows as any[])[0];
     let recs: string[] = [];
 
     if (user?.recommendations) {
