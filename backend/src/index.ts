@@ -1,10 +1,12 @@
 import express from "express";
+import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
 import cors from "cors";
 
 import type { Request, Response, NextFunction } from "express";
 
-import { errorMiddleware } from "./middlewares/errorMiddleware.js";
+import { errorMiddleware } from "./middlewares/error.middleware.js";
+import authRouter from "./routes/auth.route.js";
 
 dotenv.config();
 
@@ -14,9 +16,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req: Request, res: Response) => {
+connectDB();
+
+app.get("/api/v1", (req: Request, res: Response) => {
   res.status(200).send("API is running 🚀");
 });
+
+app.use("/api/v1/auth", authRouter);
 
 app.use(errorMiddleware);
 
