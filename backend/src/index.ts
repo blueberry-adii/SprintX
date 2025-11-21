@@ -9,6 +9,8 @@ import { errorMiddleware } from "./middlewares/error.middleware.js";
 import authRouter from "./routes/auth.route.js";
 import dashboardRouter from "./routes/dashboard.route.js";
 import taskRouter from "./routes/task.route.js";
+import routineRouter from "./routes/routine.route.js";
+import insightsRouter from "./routes/insights.route.js";
 
 dotenv.config();
 
@@ -32,12 +34,14 @@ const start = async () => {
   app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/dashboard", dashboardRouter);
   app.use("/api/v1/tasks", taskRouter);
+  app.use("/api/v1/routines", routineRouter);
+  app.use("/api/v1/insights", insightsRouter);
 
   app.use(errorMiddleware);
 
   app.listen(PORT, () => {
     console.log(`Server running on port: ${PORT}`);
   });
-}
+};
 
 start();
