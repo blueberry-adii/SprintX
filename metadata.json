@@ -1,5 +1,0 @@
-{
-  "name": "StudentFlow AI",
-  "description": "AI-driven student productivity and routine optimizer that tracks tasks, logs daily routines, and uses Gemini to provide smart scheduling and productivity insights.",
-  "requestFramePermissions": []
-}
