@@ -25,9 +25,8 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
       return;
     }
 
-    const newLog = { ...logData, id: Date.now().toString() } as RoutineLog;
+    const newLog = { ...logData, id: '' } as RoutineLog; // ID handled by backend
     addLog(newLog);
-    alert("Routine logged successfully!");
   };
 
   const moodOptions = [

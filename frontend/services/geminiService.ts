@@ -86,6 +86,6 @@ export const getQuickAdvice = async (query: string, context: string): Promise<st
     });
     return response.text || "I couldn't generate advice at this moment.";
   } catch (e) {
-    return "Service unavailable. Please check your connection.";
+    return "Service unavailable. Please check your connection or API key.";
   }
 };

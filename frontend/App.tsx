@@ -7,11 +7,11 @@ import { AIPlanner } from './components/AIPlanner';
 import { SettingsView } from './components/SettingsView';
 import { storageService } from './services/storageService';
 import { Task, RoutineLog, UserProfile } from './types';
-import { Pencil, Save, X, Plus, Trash2, Upload } from 'lucide-react';
+import { Pencil, Save, X, Plus, Trash2, Upload, Loader2 } from 'lucide-react';
 import { AIAssistant } from './components/AIAssistant';
 import { PomodoroView } from './components/PomodoroView';
 
-// ProfileView Component (Inline for simplicity in App structure)
+// ProfileView Component
 const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile: (p: UserProfile) => void }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(profile);
@@ -20,8 +20,9 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
     setEditedProfile(profile);
   }, [profile]);
 
-  const handleSave = () => {
-    setProfile(editedProfile);
+  const handleSave = async () => {
+    const updated = await storageService.saveProfile(editedProfile);
+    setProfile(updated);
     setIsEditing(false);
   };
 
@@ -186,17 +187,40 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
 };
 
 const App: React.FC = () => {
+  const [loading, setLoading] = useState(false);
   const [currentTab, setCurrentTab] = useState('dashboard');
   
   // Persistence for Theme & Dark Mode
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('studentflow_dark') === 'true');
   const [theme, setTheme] = useState(() => localStorage.getItem('studentflow_theme') || 'teal');
 
-  const [tasks, setTasks] = useState<Task[]>(() => storageService.getTasks());
-  const [logs, setLogs] = useState<RoutineLog[]>(() => storageService.getLogs());
-  const [profile, setProfile] = useState<UserProfile>(() => storageService.getProfile());
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [logs, setLogs] = useState<RoutineLog[]>([]);
+  const [profile, setProfile] = useState<UserProfile>({ name: 'Guest Student', goals: [], examDates: [] });
   
   const [focusTask, setFocusTask] = useState<Task | null>(null);
+
+  // Initialization Logic
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      try {
+        const [t, l, p] = await Promise.all([
+          storageService.getTasks(),
+          storageService.getLogs(),
+          storageService.getProfile()
+        ]);
+        setTasks(t);
+        setLogs(l);
+        setProfile(p);
+      } catch (e) {
+        console.error("Failed to load data", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, []);
 
   // Save settings
   useEffect(() => {
@@ -209,20 +233,36 @@ const App: React.FC = () => {
     localStorage.setItem('studentflow_theme', theme);
   }, [theme]);
 
-  useEffect(() => {
-    storageService.saveTasks(tasks);
-  }, [tasks]);
+  const addTask = async (task: Task) => {
+      const saved = await storageService.saveTask(task);
+      setTasks(prev => [...prev, saved]);
+  };
+  
+  const updateTask = async (task: Task) => {
+      // Optimistic update
+      setTasks(prev => prev.map(t => t.id === task.id ? task : t));
+      await storageService.updateTask(task);
+  };
 
-  useEffect(() => {
-    storageService.saveLogs(logs);
-  }, [logs]);
+  const toggleTask = async (id: string) => {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+          const updated = { ...task, completed: !task.completed };
+          // Optimistic update
+          setTasks(prev => prev.map(t => t.id === id ? updated : t));
+          await storageService.updateTask(updated);
+      }
+  };
 
-  useEffect(() => {
-    storageService.saveProfile(profile);
-  }, [profile]);
+  const deleteTask = async (id: string) => {
+    // Optimistic update for instant feedback
+    setTasks(prev => prev.filter(t => t.id !== id));
+    await storageService.deleteTask(id);
+  };
 
-  const handleAddLog = (log: RoutineLog) => {
-    setLogs([log, ...logs]);
+  const handleAddLog = async (log: RoutineLog) => {
+    const saved = await storageService.saveLog(log);
+    setLogs([saved, ...logs]);
   };
 
   const startFocusSession = (task: Task) => {
@@ -241,6 +281,14 @@ const App: React.FC = () => {
     return colors[theme] || colors.teal;
   }, [theme]);
 
+  if (loading && tasks.length === 0) {
+    return (
+        <div className="h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+            <Loader2 className="animate-spin text-violet-600" size={40} />
+        </div>
+    );
+  }
+
   return (
     <Layout currentTab={currentTab} setTab={setCurrentTab}>
       {/* Inject Dynamic CSS Variables for Theme */}
@@ -258,20 +306,25 @@ const App: React.FC = () => {
       {/* Global Overlays */}
       <AIAssistant />
 
-      <div className="mb-6 animate-fade-in">
-        <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white capitalize transition-colors">
-          {currentTab === 'ai' ? 'AI Insights' : currentTab === 'pomodoro' ? 'Focus Timer' : currentTab.replace('-', ' ')}
-        </h2>
-        <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        </p>
+      <div className="mb-6 animate-fade-in flex justify-between items-center">
+        <div>
+            <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white capitalize transition-colors">
+            {currentTab === 'ai' ? 'AI Insights' : currentTab === 'pomodoro' ? 'Focus Timer' : currentTab.replace('-', ' ')}
+            </h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm transition-colors">
+            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </p>
+        </div>
       </div>
 
       {currentTab === 'dashboard' && <Dashboard logs={logs} tasks={tasks} />}
       {currentTab === 'tasks' && (
         <TaskManager 
           tasks={tasks} 
-          setTasks={setTasks} 
+          onAddTask={addTask}
+          onUpdateTask={updateTask}
+          onToggleTask={toggleTask}
+          onDeleteTask={deleteTask}
           onStartFocus={startFocusSession} 
         />
       )}

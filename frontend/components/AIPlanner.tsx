@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { analyzeProductivity } from '../services/geminiService';
 import { Task, RoutineLog, UserProfile, AIAnalysisResult } from '../types';
-import { Sparkles, Loader2, Calendar, Brain, Clock } from 'lucide-react';
+import { Sparkles, Loader2, Calendar, Brain } from 'lucide-react';
 
 interface AIPlannerProps {
   tasks: Task[];

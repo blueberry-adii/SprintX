@@ -56,31 +56,68 @@ const initialProfile: UserProfile = {
   ]
 };
 
+// Helper to simulate network delay for realistic feel
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const storageService = {
-  getTasks: (): Task[] => {
+  getTasks: async (): Promise<Task[]> => {
+    await delay(300);
     const data = localStorage.getItem(TASKS_KEY);
     return data ? JSON.parse(data) : initialTasks;
   },
 
-  saveTasks: (tasks: Task[]) => {
-    localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+  saveTask: async (task: Task): Promise<Task> => {
+    await delay(200);
+    const tasks = await storageService.getTasks();
+    // Handle both new creation and updates if passed differently, 
+    // though saveTask usually implies creation in this context.
+    // We ensure an ID exists.
+    const newTask = { ...task, id: task.id || Date.now().toString() };
+    const updatedTasks = [...tasks, newTask];
+    localStorage.setItem(TASKS_KEY, JSON.stringify(updatedTasks));
+    return newTask;
   },
 
-  getLogs: (): RoutineLog[] => {
+  updateTask: async (task: Task): Promise<Task> => {
+    await delay(200);
+    const tasks = await storageService.getTasks();
+    const updatedTasks = tasks.map(t => t.id === task.id ? task : t);
+    localStorage.setItem(TASKS_KEY, JSON.stringify(updatedTasks));
+    return task;
+  },
+
+  deleteTask: async (id: string): Promise<void> => {
+    await delay(200);
+    const tasks = await storageService.getTasks();
+    const updatedTasks = tasks.filter(t => t.id !== id);
+    localStorage.setItem(TASKS_KEY, JSON.stringify(updatedTasks));
+  },
+
+  getLogs: async (): Promise<RoutineLog[]> => {
+    await delay(300);
     const data = localStorage.getItem(LOGS_KEY);
     return data ? JSON.parse(data) : initialLogs;
   },
 
-  saveLogs: (logs: RoutineLog[]) => {
-    localStorage.setItem(LOGS_KEY, JSON.stringify(logs));
+  saveLog: async (log: RoutineLog): Promise<RoutineLog> => {
+    await delay(200);
+    const logs = await storageService.getLogs();
+    const newLog = { ...log, id: log.id || Date.now().toString() };
+    // Prepend to list
+    const updatedLogs = [newLog, ...logs];
+    localStorage.setItem(LOGS_KEY, JSON.stringify(updatedLogs));
+    return newLog;
   },
 
-  getProfile: (): UserProfile => {
+  getProfile: async (): Promise<UserProfile> => {
+    await delay(300);
     const data = localStorage.getItem(PROFILE_KEY);
     return data ? JSON.parse(data) : initialProfile;
   },
 
-  saveProfile: (profile: UserProfile) => {
+  saveProfile: async (profile: UserProfile): Promise<UserProfile> => {
+    await delay(200);
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    return profile;
   }
 };

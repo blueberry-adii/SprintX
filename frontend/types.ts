@@ -15,6 +15,7 @@ export enum Category {
 
 export interface Task {
   id: string;
+  _id?: string; // MongoDB ID
   title: string;
   durationMinutes: number;
   deadline: string; // ISO Date string
@@ -25,6 +26,7 @@ export interface Task {
 
 export interface RoutineLog {
   id: string;
+  _id?: string; // MongoDB ID
   date: string; // YYYY-MM-DD
   wakeUpTime: string; // HH:mm
   sleepTime: string; // HH:mm
@@ -35,7 +37,9 @@ export interface RoutineLog {
 }
 
 export interface UserProfile {
+  _id?: string;
   name: string;
+  email?: string;
   profilePicture?: string; // Base64 string or URL
   goals: string[];
   examDates: { subject: string; date: string }[];

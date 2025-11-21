@@ -1,44 +1,98 @@
 import React, { useState } from 'react';
 import { Task, Priority, Category } from '../types';
-import { Plus, CheckCircle, Circle, Calendar, Clock, AlertCircle, Play, Filter } from 'lucide-react';
+import { Plus, CheckCircle, Circle, Calendar, Clock, AlertCircle, Play, Filter, Trash2, MoreVertical, Edit2 } from 'lucide-react';
 
 interface TaskManagerProps {
   tasks: Task[];
-  setTasks: (tasks: Task[]) => void;
+  onAddTask: (task: Task) => void;
+  onUpdateTask: (task: Task) => void;
+  onToggleTask: (id: string) => void;
+  onDeleteTask: (id: string) => void;
   onStartFocus: (task: Task) => void;
 }
 
-export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, onStartFocus }) => {
-  const [isAdding, setIsAdding] = useState(false);
+export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUpdateTask, onToggleTask, onDeleteTask, onStartFocus }) => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'pending' | 'completed'>('all');
-  const [newTask, setNewTask] = useState<Partial<Task>>({
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+  const defaultTaskState = {
     title: '',
     priority: Priority.MEDIUM,
     category: Category.STUDY,
-    durationMinutes: 60
-  });
-
-  const handleAddTask = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTask.title || !newTask.deadline) return;
-
-    const task: Task = {
-      id: Date.now().toString(),
-      title: newTask.title,
-      deadline: newTask.deadline,
-      priority: newTask.priority || Priority.MEDIUM,
-      category: newTask.category || Category.STUDY,
-      durationMinutes: newTask.durationMinutes || 60,
-      completed: false
-    };
-
-    setTasks([...tasks, task]);
-    setNewTask({ title: '', priority: Priority.MEDIUM, category: Category.STUDY, durationMinutes: 60 });
-    setIsAdding(false);
+    durationMinutes: 60,
+    deadline: ''
   };
 
-  const toggleTask = (id: string) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  const [formData, setFormData] = useState<Partial<Task>>(defaultTaskState);
+
+  const resetForm = () => {
+    setFormData(defaultTaskState);
+    setEditingTaskId(null);
+    setIsFormOpen(false);
+  };
+
+  const handleAddNewClick = () => {
+    resetForm();
+    setIsFormOpen(true);
+  };
+
+  const toDateTimeLocal = (isoString: string) => {
+    try {
+        const date = new Date(isoString);
+        if (isNaN(date.getTime())) return '';
+        
+        const pad = (num: number) => num.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    } catch (e) {
+        return '';
+    }
+  };
+
+  const handleEditClick = (task: Task) => {
+    setFormData({
+        title: task.title,
+        deadline: toDateTimeLocal(task.deadline),
+        priority: task.priority,
+        category: task.category,
+        durationMinutes: task.durationMinutes
+    });
+    setEditingTaskId(task.id);
+    setIsFormOpen(true);
+    setActiveMenuId(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title || !formData.deadline) return;
+
+    if (editingTaskId) {
+        // Update existing
+        const originalTask = tasks.find(t => t.id === editingTaskId);
+        const updatedTask: Task = {
+            ...originalTask!,
+            title: formData.title,
+            deadline: formData.deadline, // Logic elsewhere will handle ISO conversion if needed or keep as is
+            priority: formData.priority!,
+            category: formData.category!,
+            durationMinutes: formData.durationMinutes!,
+        };
+        onUpdateTask(updatedTask);
+    } else {
+        // Create new
+        const task: Task = {
+            id: '', // Backend or service will generate
+            title: formData.title,
+            deadline: formData.deadline,
+            priority: formData.priority || Priority.MEDIUM,
+            category: formData.category || Category.STUDY,
+            durationMinutes: formData.durationMinutes || 60,
+            completed: false
+        };
+        onAddTask(task);
+    }
+    resetForm();
   };
 
   const getPriorityColor = (p: Priority) => {
@@ -75,15 +129,18 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, onSta
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Organize and prioritize your study load.</p>
         </div>
         <button
-          onClick={() => setIsAdding(!isAdding)}
+          onClick={handleAddNewClick}
           className="flex items-center gap-2 bg-[var(--primary-600)] text-white px-5 py-2.5 rounded-xl hover:brightness-110 transition-all shadow-lg shadow-[var(--primary-600)]/20 font-medium active:scale-95"
         >
           <Plus size={20} strokeWidth={2.5} /> New Task
         </button>
       </div>
 
-      {isAdding && (
-        <form onSubmit={handleAddTask} className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-700 mb-10 animate-slide-up transition-colors">
+      {isFormOpen && (
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-700 mb-10 animate-slide-up transition-colors">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">
+              {editingTaskId ? 'Edit Task' : 'Create New Task'}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Task Name</label>
@@ -92,8 +149,8 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, onSta
                 required
                 className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] focus:border-transparent outline-none transition-all bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
                 placeholder="e.g., Finish Chapter 4 Notes"
-                value={newTask.title}
-                onChange={e => setNewTask({ ...newTask, title: e.target.value })}
+                value={formData.title}
+                onChange={e => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
             <div>
@@ -102,8 +159,8 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, onSta
                 type="datetime-local"
                 required
                 className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
-                value={newTask.deadline || ''}
-                onChange={e => setNewTask({ ...newTask, deadline: e.target.value })}
+                value={formData.deadline || ''}
+                onChange={e => setFormData({ ...formData, deadline: e.target.value })}
               />
             </div>
             <div>
@@ -112,16 +169,16 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, onSta
                 type="number"
                 min="10"
                 className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
-                value={newTask.durationMinutes}
-                onChange={e => setNewTask({ ...newTask, durationMinutes: parseInt(e.target.value) })}
+                value={formData.durationMinutes}
+                onChange={e => setFormData({ ...formData, durationMinutes: parseInt(e.target.value) })}
               />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Priority</label>
               <select
                 className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
-                value={newTask.priority}
-                onChange={e => setNewTask({ ...newTask, priority: e.target.value as Priority })}
+                value={formData.priority}
+                onChange={e => setFormData({ ...formData, priority: e.target.value as Priority })}
               >
                 {Object.values(Priority).map(p => <option key={p} value={p}>{p}</option>)}
               </select>
@@ -130,16 +187,18 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, onSta
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Category</label>
               <select
                 className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
-                value={newTask.category}
-                onChange={e => setNewTask({ ...newTask, category: e.target.value as Category })}
+                value={formData.category}
+                onChange={e => setFormData({ ...formData, category: e.target.value as Category })}
               >
                 {Object.values(Category).map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
           </div>
           <div className="mt-8 flex justify-end gap-3">
-            <button type="button" onClick={() => setIsAdding(false)} className="px-6 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl font-medium transition-colors">Cancel</button>
-            <button type="submit" className="px-6 py-2.5 bg-[var(--primary-600)] text-white rounded-xl hover:brightness-110 shadow-md font-medium">Save Task</button>
+            <button type="button" onClick={resetForm} className="px-6 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl font-medium transition-colors">Cancel</button>
+            <button type="submit" className="px-6 py-2.5 bg-[var(--primary-600)] text-white rounded-xl hover:brightness-110 shadow-md font-medium">
+                {editingTaskId ? 'Update Task' : 'Save Task'}
+            </button>
           </div>
         </form>
       )}
@@ -160,14 +219,22 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, onSta
           ))}
       </div>
 
+      {/* Backdrop for menu */}
+      {activeMenuId && (
+        <div className="fixed inset-0 z-10 bg-transparent" onClick={() => setActiveMenuId(null)}></div>
+      )}
+
       <div className="space-y-3">
         {sortedTasks.map(task => (
-          <div key={task.id} className={`group bg-white dark:bg-slate-800 p-5 rounded-2xl border transition-all duration-500 hover:shadow-lg hover:border-[var(--primary-200)] relative overflow-hidden ${task.completed ? 'border-slate-100 dark:border-slate-700 opacity-60 bg-slate-50 dark:bg-slate-800/50' : 'border-slate-100 dark:border-slate-700 shadow-sm'}`}>
+          <div 
+            key={task.id} 
+            className={`group bg-white dark:bg-slate-800 p-5 rounded-2xl border transition-all duration-500 hover:shadow-lg hover:border-[var(--primary-200)] relative ${task.completed ? 'border-slate-100 dark:border-slate-700 opacity-60 bg-slate-50 dark:bg-slate-800/50' : 'border-slate-100 dark:border-slate-700 shadow-sm'} ${activeMenuId === task.id ? 'z-50' : ''}`}
+          >
             {/* Progress Hint Bar for non-completed */}
-            {!task.completed && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary-500)] rounded-l-lg opacity-0 group-hover:opacity-100 transition-opacity"></div>}
+            {!task.completed && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary-500)] rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>}
 
             <div className="flex items-center gap-5">
-                <button onClick={() => toggleTask(task.id)} className="text-slate-300 hover:text-[var(--primary-600)] transition-colors flex-shrink-0">
+                <button onClick={() => onToggleTask(task.id)} className="text-slate-300 hover:text-[var(--primary-600)] transition-colors flex-shrink-0">
                 {task.completed ? <CheckCircle className="text-emerald-500 animate-pop" size={26} /> : <Circle size={26} strokeWidth={2} />}
                 </button>
                 
@@ -189,15 +256,55 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, setTasks, onSta
                 </div>
                 </div>
 
-                {!task.completed && (
-                    <button 
-                        onClick={() => onStartFocus(task)}
-                        className="w-12 h-12 rounded-full bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-400)] flex items-center justify-center hover:bg-[var(--primary-600)] hover:text-white transition-all transform hover:scale-110 shadow-sm group-hover:shadow-[var(--primary-200)] flex-shrink-0"
-                        title="Start Focus Timer"
+                <div className="flex items-center gap-2 relative">
+                    {!task.completed && (
+                        <button 
+                            onClick={() => onStartFocus(task)}
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-400)] flex items-center justify-center hover:bg-[var(--primary-600)] hover:text-white transition-all transform hover:scale-110 shadow-sm group-hover:shadow-[var(--primary-200)] flex-shrink-0"
+                            title="Start Focus Timer"
+                        >
+                            <Play size={20} fill="currentColor" className="ml-0.5" />
+                        </button>
+                    )}
+                    
+                    {/* Menu Trigger */}
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveMenuId(activeMenuId === task.id ? null : task.id);
+                        }}
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors flex-shrink-0"
                     >
-                        <Play size={20} fill="currentColor" className="ml-0.5" />
+                        <MoreVertical size={20} />
                     </button>
-                )}
+
+                    {/* Dropdown Menu */}
+                    {activeMenuId === task.id && (
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-fade-in">
+                            <button 
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditClick(task);
+                                }}
+                                className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                            >
+                                <Edit2 size={16} /> Edit
+                            </button>
+                            <button 
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDeleteTask(task.id);
+                                    setActiveMenuId(null);
+                                }}
+                                className="w-full text-left px-4 py-3 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2"
+                            >
+                                <Trash2 size={16} /> Delete
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
           </div>
         ))}
