@@ -7,6 +7,8 @@ import type { Request, Response, NextFunction } from "express";
 
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import authRouter from "./routes/auth.route.js";
+import dashboardRouter from "./routes/dashboard.route.js";
+import taskRouter from "./routes/task.route.js";
 
 dotenv.config();
 
@@ -28,6 +30,8 @@ const start = async () => {
   });
 
   app.use("/api/v1/auth", authRouter);
+  app.use("/api/v1/dashboard", dashboardRouter);
+  app.use("/api/v1/tasks", taskRouter);
 
   app.use(errorMiddleware);
 

@@ -55,7 +55,7 @@ export const login = asyncHandler(
   }
 );
 
-export const me = asyncHandler(async (req: Request, res: Response) => {
+export const me = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   const uid = (req as any).uid;
 
   const [rows] = await db.query(
