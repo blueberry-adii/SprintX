@@ -1,6 +1,6 @@
 import mysql from "mysql2/promise";
 
-export const db = mysql.createPool({
+export let db = mysql.createPool({
   host: process.env.DB_HOST as string,
   user: process.env.DB_USER as string,
   password: process.env.DB_PASSWORD as string,
@@ -9,6 +9,12 @@ export const db = mysql.createPool({
 
 export async function connectDB() {
   try {
+    db = mysql.createPool({
+      host: process.env.DB_HOST as string,
+      user: process.env.DB_USER as string,
+      password: process.env.DB_PASSWORD as string,
+      database: process.env.DB_NAME as string,
+    });
     const conn = await db.getConnection();
     console.log("MySQL Connected 🎉");
     conn.release();
@@ -24,11 +30,12 @@ export const initDB = async () => {
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,
         uid VARCHAR(255) NOT NULL UNIQUE,
+        email VARCHAR(255) NOT NULL,
         full_name VARCHAR(255),
         pfp_url TEXT,
-        academic_goals JSON DEFAULT JSON_ARRAY(),
-        upcoming_exams JSON DEFAULT JSON_ARRAY(),
-        recommendations JSON DEFAULT JSON_ARRAY(),
+        academic_goals JSON,
+        upcoming_exams JSON,
+        recommendations JSON,
         settings_dark_mode TINYINT(1) DEFAULT 0,
         settings_color_theme ENUM('Ocean','Royal','Sky','Sunset') DEFAULT 'Ocean',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -36,6 +43,26 @@ export const initDB = async () => {
         INDEX idx_uid (uid)
       );
     `);
+
+    try {
+      await db.query(`ALTER TABLE users ADD COLUMN email VARCHAR(255) NOT NULL AFTER uid`);
+      console.log("Added email column to users table");
+    } catch (err: any) {
+      if (err.code !== 'ER_DUP_FIELDNAME') {
+        console.log("Email column already exists or error adding it:", err.message);
+      }
+    }
+
+    // Ensure settings_color_theme column exists and has correct default
+    try {
+      await db.query(`ALTER TABLE users MODIFY COLUMN settings_color_theme ENUM('Ocean','Royal','Sky','Sunset') DEFAULT 'Ocean'`);
+    } catch (err: any) {
+      console.log("Error modifying settings_color_theme column:", err.message);
+    }
+
+    // Migration: Set default theme for existing users who might have NULL or invalid theme
+    await db.query(`UPDATE users SET settings_color_theme = 'Ocean' WHERE settings_color_theme IS NULL OR settings_color_theme = ''`);
+    console.log("Ensured default theme 'Ocean' for all users.");
 
     await db.query(`
       CREATE TABLE IF NOT EXISTS tasks (
@@ -55,7 +82,7 @@ export const initDB = async () => {
     `);
 
     await db.query(`
-        CREATE TABLE daily_routine (
+        CREATE TABLE IF NOT EXISTS daily_routine (
         id INT AUTO_INCREMENT PRIMARY KEY,
         uid VARCHAR(255) NOT NULL,
         log_date DATE NOT NULL,

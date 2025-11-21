@@ -5,7 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { ApiError } from "../utils/ApiError.js";
 
 export const getTasks = asyncHandler(async (req: Request, res: Response) => {
-  const uid = (req as any).uid;
+  const uid = (req as any).user.uid;
 
   const [rows] = await db.query(
     "SELECT * FROM tasks WHERE uid = ? ORDER BY deadline ASC",
@@ -19,23 +19,36 @@ export const getTasks = asyncHandler(async (req: Request, res: Response) => {
 });
 
 export const createTask = asyncHandler(async (req: Request, res: Response) => {
-  const uid = (req as any).uid;
+  const uid = (req as any).user.uid;
   const { title, deadline, duration_mins, priority, category } = req.body;
 
-  await db.query(
+  const [result]: any = await db.query(
     `INSERT INTO tasks 
-       (uid, title, deadline, duration_mins, priority, category, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')`,
+       (uid, title, deadline, duration_mins, priority, category)
+       VALUES (?, ?, ?, ?, ?, ?)`,
     [uid, title, deadline, duration_mins || 0, priority, category]
   );
 
+  const newTask = {
+    id: result.insertId,
+    uid,
+    title,
+    deadline,
+    duration_mins: duration_mins || 0,
+    priority,
+    category,
+    status: 'Pending',
+    created_at: new Date(),
+    updated_at: new Date()
+  };
+
   return res
     .status(201)
-    .json(new ApiResponse(201, [], "Task created successfully"));
+    .json(new ApiResponse(201, newTask, "Task created successfully"));
 });
 
 export const editTask = asyncHandler(async (req: Request, res: Response) => {
-  const uid = (req as any).uid;
+  const uid = (req as any).user.uid;
   const taskId = req.params.id;
   const updates = req.body;
 
@@ -43,23 +56,29 @@ export const editTask = asyncHandler(async (req: Request, res: Response) => {
     return new ApiError(400, "No fields to update");
   }
 
+  console.log('Updating task:', taskId, 'with updates:', updates);
+
   const keys = Object.keys(updates);
   const values = Object.values(updates);
 
   const setClause = keys.map((key) => `${key} = ?`).join(", ");
 
-  await db.query(`UPDATE tasks SET ${setClause} WHERE id = ? AND uid = ?`, [
+  const [result]: any = await db.query(`UPDATE tasks SET ${setClause} WHERE id = ? AND uid = ?`, [
     ...values,
     taskId,
     uid,
   ]);
 
-  return res.status(200).json(new ApiResponse(200, [], "Task updated successfully"));
+  console.log('Update result:', result);
+
+  const [rows]: any = await db.query("SELECT * FROM tasks WHERE id = ? AND uid = ?", [taskId, uid]);
+
+  return res.status(200).json(new ApiResponse(200, rows[0], "Task updated successfully"));
 });
 
 export const completeTask = asyncHandler(
   async (req: Request, res: Response) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
     const taskId = req.params.id;
 
     await db.query(
@@ -67,13 +86,15 @@ export const completeTask = asyncHandler(
       [taskId, uid]
     );
 
-    return res.status(200).json(new ApiResponse(200, [], "Task marked as completed"));
+    const [rows]: any = await db.query("SELECT * FROM tasks WHERE id = ? AND uid = ?", [taskId, uid]);
+
+    return res.status(200).json(new ApiResponse(200, rows[0], "Task marked as completed"));
   }
 );
 
 export const uncompleteTask = asyncHandler(
   async (req: Request, res: Response) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
     const taskId = req.params.id;
 
     await db.query(
@@ -81,12 +102,14 @@ export const uncompleteTask = asyncHandler(
       [taskId, uid]
     );
 
-    return res.status(200).json(new ApiResponse(200, [], "Task marked as pending"));
+    const [rows]: any = await db.query("SELECT * FROM tasks WHERE id = ? AND uid = ?", [taskId, uid]);
+
+    return res.status(200).json(new ApiResponse(200, rows[0], "Task marked as pending"));
   }
 );
 
 export const deleteTask = asyncHandler(async (req: Request, res: Response) => {
-  const uid = (req as any).uid;
+  const uid = (req as any).user.uid;
   const taskId = req.params.id;
 
   await db.query("DELETE FROM tasks WHERE id = ? AND uid = ?", [taskId, uid]);

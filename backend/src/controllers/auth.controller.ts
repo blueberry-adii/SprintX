@@ -6,7 +6,7 @@ import { db } from "../config/db.js";
 
 export const register = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
     const { name, email } = req.body;
 
     const [rows] = await db.query("SELECT id FROM users WHERE uid = ?", [uid]);
@@ -17,7 +17,8 @@ export const register = asyncHandler(
       throw new ApiError(409, "User already registered");
     }
 
-    await db.query("INSERT INTO users (uid, name, email) VALUES (?, ?, ?)", [
+    // Note: Schema needs 'email' column added. For now, mapping 'name' to 'full_name'.
+    await db.query("INSERT INTO users (uid, full_name, email) VALUES (?, ?, ?)", [
       uid,
       name,
       email,
@@ -31,10 +32,10 @@ export const register = asyncHandler(
 
 export const login = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
 
     const [rows] = await db.query(
-      "SELECT id, uid, name, email FROM users WHERE uid = ?",
+      "SELECT id, uid, full_name, email FROM users WHERE uid = ?",
       [uid]
     );
 
@@ -56,7 +57,7 @@ export const login = asyncHandler(
 );
 
 export const me = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  const uid = (req as any).uid;
+  const uid = (req as any).user.uid;
 
   const [rows] = await db.query(
     "SELECT id, uid, full_name, pfp_url, academic_goals, upcoming_exams, recommendations, settings_dark_mode, settings_color_theme, created_at, updated_at FROM users WHERE uid = ?",
@@ -78,7 +79,7 @@ export const me = asyncHandler(async (req: Request, res: Response, next: NextFun
 
 export const updateProfile = asyncHandler(
   async (req: Request & { user?: any }, res: Response, next: NextFunction) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
     const updates = req.body;
 
     if (!updates || Object.keys(updates).length === 0) {

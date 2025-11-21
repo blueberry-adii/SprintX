@@ -7,7 +7,7 @@ export const getDashboard = async (
   res: Response,
   next: NextFunction
 ) => {
-  const uid = (req as any).uid;
+  const uid = (req as any).user.uid;
 
   const [userRows] = await db.query(
     "SELECT full_name FROM users WHERE uid = ?",
@@ -44,11 +44,11 @@ export const getDashboard = async (
     last7.length === 0
       ? 0
       : Number(
-          (
-            last7.reduce((sum, row) => sum + (row.study_hours || 0), 0) /
-            last7.length
-          ).toFixed(2)
-        );
+        (
+          last7.reduce((sum, row) => sum + (row.study_hours || 0), 0) /
+          last7.length
+        ).toFixed(2)
+      );
 
   const [prevRows] = await db.query(
     `SELECT 

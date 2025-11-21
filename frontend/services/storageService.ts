@@ -1,9 +1,9 @@
 import { Task, RoutineLog, UserProfile, Priority, Category } from '../types';
 import { api } from './api';
 
-const TASKS_KEY = 'studentflow_tasks';
-const LOGS_KEY = 'studentflow_logs';
-const PROFILE_KEY = 'studentflow_profile';
+const TASKS_KEY = 'studentflow_tasks_v3';
+const LOGS_KEY = 'studentflow_logs_v3';
+const PROFILE_KEY = 'studentflow_profile_v3';
 
 // Cache duration in milliseconds (e.g., 5 minutes)
 const CACHE_DURATION = 5 * 60 * 1000;
@@ -39,17 +39,49 @@ const saveToCache = <T>(key: string, data: T) => {
   localStorage.setItem(key, JSON.stringify(item));
 };
 
+// Helper to map backend task to frontend task
+const mapTask = (data: any): Task => ({
+  id: data.id,
+  title: data.title,
+  deadline: data.deadline,
+  durationMinutes: data.duration_mins || 0,
+  priority: data.priority,
+  category: data.category,
+  completed: data.status === 'Completed'
+});
+
+// Theme Mapping
+const themeMap: Record<string, string> = {
+  'teal': 'Ocean',
+  'violet': 'Royal',
+  'blue': 'Sky',
+  'orange': 'Sunset'
+};
+
+const reverseThemeMap: Record<string, string> = {
+  'Ocean': 'teal',
+  'Royal': 'violet',
+  'Sky': 'blue',
+  'Sunset': 'orange'
+};
+
 export const storageService = {
   getTasks: async (): Promise<Task[]> => {
     // Try cache first
     const cachedTasks = getFromCache<Task[]>(TASKS_KEY);
-    if (cachedTasks) {
+    if (cachedTasks && Array.isArray(cachedTasks)) {
       return cachedTasks;
     }
 
     // Fetch from API
     try {
-      const tasks = await api.get('/tasks');
+      const response = await api.get('/tasks');
+      const tasksData = response.data;
+      if (!Array.isArray(tasksData)) {
+        console.error("Invalid tasks format received from API", tasksData);
+        return [];
+      }
+      const tasks = tasksData.map(mapTask);
       saveToCache(TASKS_KEY, tasks);
       return tasks;
     } catch (error) {
@@ -60,7 +92,18 @@ export const storageService = {
 
   saveTask: async (task: Task): Promise<Task> => {
     try {
-      const savedTask = await api.post('/tasks', task);
+      // Map frontend task to backend format for sending
+      const backendTask = {
+        title: task.title,
+        deadline: task.deadline,
+        duration_mins: task.durationMinutes,
+        priority: task.priority,
+        category: task.category,
+        status: task.completed ? 'Completed' : 'Pending'
+      };
+
+      const response = await api.post('/tasks', backendTask);
+      const savedTask = mapTask(response.data);
 
       // Update cache
       const currentTasks = getFromCache<Task[]>(TASKS_KEY) || [];
@@ -76,7 +119,17 @@ export const storageService = {
 
   updateTask: async (task: Task): Promise<Task> => {
     try {
-      const updatedTask = await api.put(`/tasks/${task.id}`, task);
+      const backendTask = {
+        title: task.title,
+        deadline: task.deadline,
+        duration_mins: task.durationMinutes,
+        priority: task.priority,
+        category: task.category,
+        status: task.completed ? 'Completed' : 'Pending'
+      };
+
+      const response = await api.put(`/tasks/${task.id}`, backendTask);
+      const updatedTask = mapTask(response.data);
 
       // Update cache
       const currentTasks = getFromCache<Task[]>(TASKS_KEY) || [];
@@ -106,12 +159,17 @@ export const storageService = {
 
   getLogs: async (): Promise<RoutineLog[]> => {
     const cachedLogs = getFromCache<RoutineLog[]>(LOGS_KEY);
-    if (cachedLogs) {
+    if (cachedLogs && Array.isArray(cachedLogs)) {
       return cachedLogs;
     }
 
     try {
-      const logs = await api.get('/routines/latest');
+      const response = await api.get('/routines/latest');
+      const logs = response.data;
+      if (!Array.isArray(logs)) {
+        console.error("Invalid logs format received from API", logs);
+        return [];
+      }
       saveToCache(LOGS_KEY, logs);
       return logs;
     } catch (error) {
@@ -122,7 +180,8 @@ export const storageService = {
 
   saveLog: async (log: RoutineLog): Promise<RoutineLog> => {
     try {
-      const savedLog = await api.post('/routines', log);
+      const response = await api.post('/routines', log);
+      const savedLog = response.data;
 
       // Update cache - prepend new log
       const currentLogs = getFromCache<RoutineLog[]>(LOGS_KEY) || [];
@@ -144,16 +203,17 @@ export const storageService = {
 
     try {
       const response = await api.get('/auth/me');
+      const data = response.data;
       // Map backend snake_case to frontend camelCase
       const profile: UserProfile = {
-        name: response.full_name || response.name || 'Student',
-        email: response.email,
-        profilePicture: response.pfp_url,
-        goals: typeof response.academic_goals === 'string' ? JSON.parse(response.academic_goals) : (response.academic_goals || []),
-        examDates: typeof response.upcoming_exams === 'string' ? JSON.parse(response.upcoming_exams) : (response.upcoming_exams || []),
+        name: data.full_name || data.name || 'Student',
+        email: data.email,
+        profilePicture: data.pfp_url,
+        goals: typeof data.academic_goals === 'string' ? JSON.parse(data.academic_goals) : (data.academic_goals || []),
+        examDates: typeof data.upcoming_exams === 'string' ? JSON.parse(data.upcoming_exams) : (data.upcoming_exams || []),
         settings: {
-          darkMode: response.settings_dark_mode === 1,
-          theme: response.settings_color_theme || 'teal'
+          darkMode: data.settings_dark_mode === 1,
+          theme: reverseThemeMap[data.settings_color_theme] || 'teal'
         }
       };
 
@@ -167,7 +227,15 @@ export const storageService = {
 
   saveProfile: async (profile: UserProfile): Promise<UserProfile> => {
     try {
-      const updatedProfile = await api.put('/auth/profile', profile);
+      // Create a copy of profile to avoid mutating the original
+      const profileToSend = { ...profile };
+      // Remove settings from the payload if the backend doesn't support updating them via this endpoint
+      const { settings, ...rest } = profileToSend as any;
+
+      const response = await api.put('/auth/profile', rest);
+      // The response might not contain the full profile, so we merge with local state or just return what we sent
+      // But to be safe and keep cache consistent:
+      const updatedProfile = { ...profile };
       saveToCache(PROFILE_KEY, updatedProfile);
       return updatedProfile;
     } catch (error) {
@@ -179,7 +247,7 @@ export const storageService = {
   toggleDarkMode: async (): Promise<boolean> => {
     try {
       const res = await api.patch('/settings/dark-mode', {});
-      const isDark = res.dark_mode;
+      const isDark = res.data.dark_mode;
 
       // Update cache
       const profile = getFromCache<UserProfile>(PROFILE_KEY);
@@ -197,7 +265,8 @@ export const storageService = {
 
   changeTheme: async (theme: string): Promise<string> => {
     try {
-      const res = await api.patch('/settings/theme', { theme });
+      const backendTheme = themeMap[theme] || 'Ocean';
+      const res = await api.patch('/settings/theme', { theme: backendTheme });
 
       // Update cache
       const profile = getFromCache<UserProfile>(PROFILE_KEY);

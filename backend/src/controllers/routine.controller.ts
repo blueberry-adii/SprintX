@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const addDailyLog = asyncHandler(async (req: Request, res: Response) => {
-  const uid = (req as any).uid;
+  const uid = (req as any).user.uid;
 
   const {
     log_date,
@@ -39,10 +39,10 @@ export const addDailyLog = asyncHandler(async (req: Request, res: Response) => {
     10,
     Math.round(
       moodScore * 0.5 +
-        (study_hours || 0) * 0.5 +
-        (exercise_mins || 0) / 30 +
-        sleepHours * 0.4 -
-        (screen_hours || 0) * 0.2
+      (study_hours || 0) * 0.5 +
+      (exercise_mins || 0) / 30 +
+      sleepHours * 0.4 -
+      (screen_hours || 0) * 0.2
     )
   );
 
@@ -80,7 +80,7 @@ export const addDailyLog = asyncHandler(async (req: Request, res: Response) => {
 
 export const getLatestLogs = asyncHandler(
   async (req: Request, res: Response) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
 
     const [rows] = await db.query(
       `

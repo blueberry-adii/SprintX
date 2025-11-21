@@ -6,7 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 export const toggleDarkMode = asyncHandler(
   async (req: Request, res: Response) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
 
     const [rows] = await db.query(
       "SELECT settings_dark_mode FROM users WHERE uid = ?",
@@ -35,7 +35,7 @@ export const toggleDarkMode = asyncHandler(
 );
 
 export const changeTheme = asyncHandler(async (req: Request, res: Response) => {
-  const uid = (req as any).uid;
+  const uid = (req as any).user.uid;
   const { theme } = req.body;
 
   const allowed = ["Ocean", "Royal", "Sky", "Sunset"];

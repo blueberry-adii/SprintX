@@ -1,6 +1,8 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import express from "express";
 import { connectDB, initDB } from "./config/db.js";
-import dotenv from "dotenv";
 import cors from "cors";
 
 import type { Request, Response, NextFunction } from "express";
@@ -12,8 +14,6 @@ import taskRouter from "./routes/task.route.js";
 import routineRouter from "./routes/routine.route.js";
 import insightsRouter from "./routes/insights.route.js";
 import settingsRouter from "./routes/settings.route.js";
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { ArrowRight, Loader2, User, Mail, Lock, AlertCircle } from 'lucide-react';
+import { ArrowRight, Loader2, AlertCircle } from 'lucide-react';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider } from '../src/firebase';
 
 interface AuthPageProps {
   onLogin: () => void;
@@ -18,29 +20,43 @@ const BackgroundAnimation = () => (
 
 export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
   const navigate = useNavigate();
-  const [isRegister, setIsRegister] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGoogleLogin = async () => {
     setError('');
     setLoading(true);
 
     try {
-      let res;
-      if (isRegister) {
-        res = await api.post('/auth/register', formData);
-      } else {
-        res = await api.post('/auth/login', { email: formData.email, password: formData.password });
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const token = await user.getIdToken();
+
+      // Store token temporarily for the request
+      localStorage.setItem('token', token);
+
+      try {
+        // Try to login
+        await api.post('/auth/login', {});
+      } catch (loginError: any) {
+        // If user not found (404), register them
+        if (loginError.message && loginError.message.includes('User not found')) {
+          await api.post('/auth/register', {
+            name: user.displayName,
+            email: user.email,
+          });
+        } else {
+          throw loginError;
+        }
       }
 
-      localStorage.setItem('token', res.token);
+      // Final success
       onLogin();
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Authentication failed');
+      console.error("Auth Error:", err);
+      setError(err.message || 'Authentication failed');
+      localStorage.removeItem('token'); // Cleanup on error
     } finally {
       setLoading(false);
     }
@@ -56,10 +72,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
             <span className="text-white font-bold text-3xl">S</span>
           </div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
-            {isRegister ? 'Create Account' : 'Welcome Back'}
+            Welcome to StudentFlow
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
-            {isRegister ? 'Join StudentFlow to boost your productivity' : 'Sign in to continue your progress'}
+            Sign in to continue your progress
           </p>
         </div>
 
@@ -70,74 +86,27 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLogin }) => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {isRegister && (
-            <div>
-              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 ml-1">Full Name</label>
-              <div className="relative group">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-500 transition-colors" size={20} />
-                <input
-                  type="text"
-                  required
-                  className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none dark:text-white transition-all placeholder:text-slate-400"
-                  placeholder="John Doe"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                />
-              </div>
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 ml-1">Email Address</label>
-            <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-500 transition-colors" size={20} />
-              <input
-                type="email"
-                required
-                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none dark:text-white transition-all placeholder:text-slate-400"
-                placeholder="you@university.edu"
-                value={formData.email}
-                onChange={e => setFormData({ ...formData, email: e.target.value })}
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 ml-1">Password</label>
-            <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-sky-500 transition-colors" size={20} />
-              <input
-                type="password"
-                required
-                className="w-full pl-12 pr-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-transparent outline-none dark:text-white transition-all placeholder:text-slate-400"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={e => setFormData({ ...formData, password: e.target.value })}
-              />
-            </div>
-          </div>
-
+        <div className="space-y-5">
           <button
-            type="submit"
+            onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full bg-gradient-to-r from-sky-500 to-teal-400 hover:brightness-110 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:-translate-y-0.5 flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-2"
+            className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-white font-bold py-4 rounded-xl transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-3 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {loading ? <Loader2 className="animate-spin" /> : (isRegister ? 'Create Account' : 'Sign In')}
-            {!loading && <ArrowRight size={20} />}
+            {loading ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              <>
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-6 h-6" />
+                <span>Sign in with Google</span>
+              </>
+            )}
           </button>
-        </form>
+        </div>
 
         <div className="mt-8 text-center">
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-2">
-            {isRegister ? 'Already have an account?' : "Don't have an account yet?"}
+          <p className="text-slate-400 text-xs">
+            By signing in, you agree to our Terms of Service and Privacy Policy.
           </p>
-          <button
-            onClick={() => { setIsRegister(!isRegister); setError(''); }}
-            className="text-sm font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 transition-colors"
-          >
-            {isRegister ? 'Sign in to your account' : 'Create a free account'}
-          </button>
         </div>
       </div>
     </div>
