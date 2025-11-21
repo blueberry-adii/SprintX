@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { RoutineLog } from '../types';
-import { Save, Moon, Sun, Monitor, BookOpen, Activity } from 'lucide-react';
+import { Save, Sun, Monitor, BookOpen, Activity } from 'lucide-react';
 
 interface RoutineLoggerProps {
   logs: RoutineLog[];
@@ -20,7 +20,6 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Basic duplicate check
     if (logs.some(l => l.date === logData.date)) {
       alert("A log for this date already exists!");
       return;
@@ -31,115 +30,144 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
     alert("Routine logged successfully!");
   };
 
+  const moodOptions = [
+    { value: 2, label: 'Terrible', emoji: '😫' },
+    { value: 4, label: 'Bad', emoji: '🙁' },
+    { value: 6, label: 'Okay', emoji: '😐' },
+    { value: 8, label: 'Good', emoji: '🙂' },
+    { value: 10, label: 'Great', emoji: '🤩' },
+  ];
+
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <div className="border-b border-slate-100 pb-4 mb-6">
-          <h2 className="text-xl font-bold text-slate-800">Log Daily Routine</h2>
-          <p className="text-slate-500 text-sm">Track your habits to get better AI recommendations.</p>
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-slate-200/40 dark:shadow-black/20 border border-slate-100 dark:border-slate-700 p-8 animate-fade-in transition-colors">
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Log Daily Routine</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Track your habits to help the AI understand your flow.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Date</label>
-              <input
-                type="date"
-                required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                value={logData.date}
-                onChange={e => setLogData({ ...logData, date: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Mood (1-10)</label>
-              <input
-                type="number"
-                min="1" max="10"
-                required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                value={logData.moodRating}
-                onChange={e => setLogData({ ...logData, moodRating: parseInt(e.target.value) })}
-              />
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Date */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Date</label>
+            <input
+              type="date"
+              required
+              className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 transition-all"
+              value={logData.date}
+              onChange={e => setLogData({ ...logData, date: e.target.value })}
+            />
+          </div>
+
+          {/* Mood Selector - Visual */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">How did you feel today?</label>
+            <div className="flex justify-between gap-3">
+              {moodOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setLogData({ ...logData, moodRating: option.value })}
+                  className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-200 ${
+                    logData.moodRating === option.value
+                      ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 border-[var(--primary-500)] shadow-md scale-105'
+                      : 'bg-white dark:bg-slate-700 border-slate-100 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600'
+                  }`}
+                >
+                  <span className="text-2xl filter drop-shadow-sm" role="img" aria-label={option.label}>{option.emoji}</span>
+                  <span className={`text-[10px] font-bold uppercase tracking-wide ${logData.moodRating === option.value ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)]' : 'text-slate-400'}`}>
+                    {option.label}
+                  </span>
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <h3 className="font-medium text-slate-900 flex items-center gap-2">
-                <Sun size={18} className="text-orange-500" /> Sleep Schedule
-              </h3>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">Wake Up Time</label>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Study (hrs)</label>
+              <div className="relative">
+                <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--primary-500)]" size={18} />
                 <input
-                  type="time"
+                  type="number"
+                  min="0"
+                  step="0.5"
                   required
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md"
-                  value={logData.wakeUpTime}
-                  onChange={e => setLogData({ ...logData, wakeUpTime: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
+                  value={logData.studyHours}
+                  onChange={e => setLogData({ ...logData, studyHours: parseFloat(e.target.value) })}
                 />
               </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">Sleep Time</label>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Screen (hrs)</label>
+              <div className="relative">
+                 <Monitor className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500" size={18} />
                 <input
-                  type="time"
+                  type="number"
+                  min="0"
+                  step="0.5"
                   required
-                  className="w-full px-3 py-2 border border-slate-300 rounded-md"
-                  value={logData.sleepTime}
-                  onChange={e => setLogData({ ...logData, sleepTime: e.target.value })}
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
+                  value={logData.screenTimeHours}
+                  onChange={e => setLogData({ ...logData, screenTimeHours: parseFloat(e.target.value) })}
                 />
               </div>
             </div>
-
-            <div className="space-y-4">
-              <h3 className="font-medium text-slate-900 flex items-center gap-2">
-                <Activity size={18} className="text-indigo-500" /> Activities
-              </h3>
-              <div className="flex items-center gap-3">
-                <BookOpen size={16} className="text-slate-400" />
-                <div className="flex-1">
-                  <label className="block text-xs text-slate-500 mb-1">Study (Hours)</label>
-                  <input
-                    type="number" step="0.5"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md"
-                    value={logData.studyHours}
-                    onChange={e => setLogData({ ...logData, studyHours: parseFloat(e.target.value) })}
-                  />
-                </div>
-              </div>
-               <div className="flex items-center gap-3">
-                <Monitor size={16} className="text-slate-400" />
-                <div className="flex-1">
-                  <label className="block text-xs text-slate-500 mb-1">Screen Time (Hours)</label>
-                  <input
-                    type="number" step="0.5"
-                    className="w-full px-3 py-2 border border-slate-300 rounded-md"
-                    value={logData.screenTimeHours}
-                    onChange={e => setLogData({ ...logData, screenTimeHours: parseFloat(e.target.value) })}
-                  />
-                </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Exercise (mins)</label>
+              <div className="relative">
+                <Activity className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500" size={18} />
+                <input
+                  type="number"
+                  min="0"
+                  step="5"
+                  required
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
+                  value={logData.exerciseMinutes}
+                  onChange={e => setLogData({ ...logData, exerciseMinutes: parseInt(e.target.value) })}
+                />
               </div>
             </div>
           </div>
 
-          <div className="pt-4">
-             <button type="submit" className="w-full bg-slate-900 text-white py-3 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 font-medium shadow-lg shadow-indigo-100">
-               <Save size={18} /> Save Daily Log
-             </button>
+          <div className="grid grid-cols-2 gap-5">
+             <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Wake Up</label>
+                <div className="relative">
+                    <Sun className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500" size={18} />
+                    <input 
+                        type="time" 
+                        required
+                        className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
+                        value={logData.wakeUpTime}
+                        onChange={e => setLogData({...logData, wakeUpTime: e.target.value})}
+                    />
+                </div>
+             </div>
+             <div>
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Sleep</label>
+                <div className="relative">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🌙</div>
+                    <input 
+                        type="time" 
+                        required
+                        className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
+                        value={logData.sleepTime}
+                        onChange={e => setLogData({...logData, sleepTime: e.target.value})}
+                    />
+                </div>
+             </div>
           </div>
+
+          <button
+            type="submit"
+            className="w-full bg-[var(--primary-600)] text-white font-bold py-4 rounded-2xl hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary-600)]/30 hover:shadow-xl active:scale-[0.99]"
+          >
+            <Save size={20} />
+            Save Daily Log
+          </button>
         </form>
-      </div>
-      
-      <div className="mt-8">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">Recent History</h3>
-        <div className="space-y-2">
-          {logs.slice(0, 5).map(log => (
-            <div key={log.id} className="bg-white p-3 rounded-lg border border-slate-100 flex justify-between text-sm">
-              <span className="font-medium text-slate-700">{new Date(log.date).toLocaleDateString()}</span>
-              <span className="text-slate-500">Study: {Number(log.studyHours).toFixed(2)}h | Screen: {Number(log.screenTimeHours).toFixed(2)}h</span>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   );

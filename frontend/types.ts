@@ -36,6 +36,7 @@ export interface RoutineLog {
 
 export interface UserProfile {
   name: string;
+  profilePicture?: string; // Base64 string or URL
   goals: string[];
   examDates: { subject: string; date: string }[];
 }
