@@ -14,11 +14,11 @@ Date: 21-11-25
 ## 2. Navigation Test
 *Visited Pages:*
 - Dashboard → PASS  
-  Screenshot : ![DashBoard](ss/dashboard.png)
+  Screenshot : ![DashBoard](../ss/Dashboard1.png)
 - Task Manager → PASS 
-  Screenshot : ![TaskManager](ss/task_manager.png)
+  Screenshot : ![TaskManager](../ss/taskManager1.png)
 - Routine Logger → PASS
-  Screenshot : ![RoutineLogger](ss/daily_log.png)
+  Screenshot : ![RoutineLogger](../ss/routineLogger1.png)
 - AI Planner → PASS  
 
 ---
