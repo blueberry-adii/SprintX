@@ -1,30 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Task } from '../types';
-import { Play, Pause, RotateCcw, CheckCircle, Zap, Coffee, Brain, Maximize2, X } from 'lucide-react';
+import { Play, Pause, RotateCcw, CheckCircle, Zap, Coffee, Brain } from 'lucide-react';
 
 interface PomodoroViewProps {
   tasks: Task[];
   initialTask?: Task | null;
-  isMinimized?: boolean;
-  onMaximize?: () => void;
 }
 
-export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, isMinimized = false, onMaximize }) => {
+export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask }) => {
   const [selectedTaskId, setSelectedTaskId] = useState<string>(initialTask?.id || '');
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
   const [mode, setMode] = useState<'focus' | 'short' | 'long'>('focus');
-  
-  // State to track if the user manually dismissed the floating window
-  const [isFloatingDismissed, setIsFloatingDismissed] = useState(false);
-
-  // Draggable state
-  const [position, setPosition] = useState(() => ({ 
-    x: Math.max(20, window.innerWidth - 360), 
-    y: 100 
-  }));
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStartOffset = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (initialTask) {
@@ -32,14 +19,6 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
     }
   }, [initialTask]);
 
-  // Reset floating dismissal when user returns to full view
-  useEffect(() => {
-    if (!isMinimized) {
-      setIsFloatingDismissed(false);
-    }
-  }, [isMinimized]);
-
-  // Timer Logic
   useEffect(() => {
     let interval: any;
     if (isActive && timeLeft > 0) {
@@ -48,46 +27,10 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
       }, 1000);
     } else if (timeLeft === 0) {
       setIsActive(false);
-      // Optional: Play sound or notification here
+      // Play sound logic here
     }
     return () => clearInterval(interval);
   }, [isActive, timeLeft]);
-
-  // Drag & Drop Logic
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      setPosition({
-        x: e.clientX - dragStartOffset.current.x,
-        y: e.clientY - dragStartOffset.current.y
-      });
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging]);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    // Prevent drag start if clicking on interactive elements
-    if ((e.target as HTMLElement).closest('button')) return;
-    
-    setIsDragging(true);
-    dragStartOffset.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
-    };
-  };
 
   const switchMode = (newMode: 'focus' | 'short' | 'long') => {
     setMode(newMode);
@@ -121,70 +64,6 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
       return 'from-violet-50 dark:from-violet-900/30';
   }
 
-  // --- Minimized Floating View ---
-  if (isMinimized) {
-    // Render nothing if dismissed or if the timer isn't active (and is at start)
-    if (isFloatingDismissed || (!isActive && timeLeft === totalTime)) return null;
-
-    return (
-      <div 
-        className="fixed z-[100] shadow-2xl rounded-2xl overflow-hidden cursor-move select-none border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/90 backdrop-blur-md w-80 transition-transform active:scale-[0.99] animate-slide-up"
-        style={{ left: position.x, top: position.y }}
-        onMouseDown={handleMouseDown}
-      >
-        {/* Drag Handle / Header */}
-        <div className="bg-slate-50/50 dark:bg-slate-700/50 p-3 flex items-center justify-between border-b border-slate-100 dark:border-slate-700">
-            <div className="flex items-center gap-2 pointer-events-none">
-                <div className={`p-1 rounded-md ${mode === 'focus' ? 'bg-[var(--primary-100)] text-[var(--primary-600)]' : mode === 'short' ? 'bg-sky-100 text-sky-600' : 'bg-violet-100 text-violet-600'}`}>
-                    {mode === 'focus' ? <Zap size={12} /> : mode === 'short' ? <Coffee size={12} /> : <Brain size={12} />}
-                </div>
-                <span className="text-[10px] font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">
-                    {mode === 'focus' ? 'Focus' : 'Break'}
-                </span>
-            </div>
-            <div className="flex items-center gap-1">
-                <button 
-                    onClick={onMaximize} 
-                    className="p-1.5 text-slate-400 hover:text-[var(--primary-600)] hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors" 
-                    title="Maximize"
-                >
-                    <Maximize2 size={14} />
-                </button>
-                <button 
-                    onClick={() => setIsFloatingDismissed(true)} 
-                    className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-colors" 
-                    title="Close (Keep Running)"
-                >
-                    <X size={14} />
-                </button>
-            </div>
-        </div>
-        
-        {/* Body */}
-        <div className="p-4">
-            <div className="flex items-center justify-between gap-4">
-                <div className={`text-4xl font-mono font-bold tracking-tighter pointer-events-none ${getThemeClasses().split(' ')[0]}`}>
-                    {formatTime(timeLeft)}
-                </div>
-                <button 
-                    onClick={() => setIsActive(!isActive)}
-                    className={`w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-md transition-transform active:scale-95 hover:brightness-110 ${getThemeClasses().split(' ')[1]}`}
-                >
-                    {isActive ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-0.5" />}
-                </button>
-            </div>
-            <div className="mt-3 bg-slate-100 dark:bg-slate-700 h-1 rounded-full overflow-hidden pointer-events-none">
-                <div 
-                    className={`h-full transition-all duration-1000 ease-linear ${getThemeClasses().split(' ')[1]}`}
-                    style={{ width: `${progress}%` }} 
-                />
-            </div>
-        </div>
-      </div>
-    );
-  }
-
-  // --- Full View ---
   return (
     <div className="max-w-5xl mx-auto animate-fade-in h-full">
        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full">
@@ -200,49 +79,23 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
              <div className={`absolute top-0 inset-x-0 h-64 bg-gradient-to-b ${getBgGradient()} to-transparent opacity-50 pointer-events-none`}></div>
 
              {/* Mode Toggles */}
-             <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 p-2 bg-slate-100/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-2xl mb-8 md:mb-12 relative z-10 border border-white/50 dark:border-slate-600 shadow-sm">
-                
-                <button
-                    onClick={() => switchMode('focus')}
-                    className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                        mode === 'focus' 
-                        ? 'bg-white dark:bg-slate-600 text-[var(--primary-600)] dark:text-white shadow-md ring-1 ring-slate-200 dark:ring-slate-500' 
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-600/50'
-                    }`}
-                >
-                    <Zap size={18} className={mode === 'focus' ? "fill-current" : ""} />
-                    Focus
-                </button>
-
-                <div className="hidden md:block w-px h-8 bg-slate-300 dark:bg-slate-600 mx-2"></div>
-
-                <div className="flex items-center gap-1 p-1.5 rounded-xl bg-slate-200/50 dark:bg-slate-800/50">
-                    <span className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Break</span>
-                    
+             <div className="flex flex-wrap justify-center gap-2 p-1.5 bg-slate-100/80 dark:bg-slate-700/50 backdrop-blur-sm rounded-2xl mb-8 md:mb-12 relative z-10">
+                {(['focus', 'short', 'long'] as const).map((m) => (
                     <button
-                        onClick={() => switchMode('short')}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
-                            mode === 'short' 
-                            ? 'bg-white dark:bg-slate-600 text-sky-500 dark:text-white shadow-sm' 
-                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/50'
+                        key={m}
+                        onClick={() => switchMode(m)}
+                        className={`px-4 md:px-6 py-2.5 rounded-xl text-xs md:text-sm font-bold transition-all flex items-center gap-2 ${
+                            mode === m 
+                            ? 'bg-white dark:bg-slate-600 text-slate-800 dark:text-white shadow-md transform scale-105' 
+                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-600/50'
                         }`}
                     >
-                        <Coffee size={14} />
-                        Short
+                        {m === 'focus' && <Zap size={16} className={mode === m ? 'text-[var(--primary-500)]' : ''}/>}
+                        {m === 'short' && <Coffee size={16} className={mode === m ? 'text-sky-500' : ''}/>}
+                        {m === 'long' && <Brain size={16} className={mode === m ? 'text-violet-500' : ''}/>}
+                        <span className="capitalize">{m.replace('-', ' ')}</span>
                     </button>
-                    
-                    <button
-                        onClick={() => switchMode('long')}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
-                            mode === 'long' 
-                            ? 'bg-white dark:bg-slate-600 text-violet-500 dark:text-white shadow-sm' 
-                            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-700/50'
-                        }`}
-                    >
-                        <Brain size={14} />
-                        Long
-                    </button>
-                </div>
+                ))}
              </div>
 
              {/* Timer Display */}

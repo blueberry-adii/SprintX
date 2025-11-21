@@ -73,7 +73,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
         const updatedTask: Task = {
             ...originalTask!,
             title: formData.title,
-            deadline: formData.deadline, // Logic elsewhere will handle ISO conversion if needed or keep as is
+            deadline: formData.deadline, 
             priority: formData.priority!,
             category: formData.category!,
             durationMinutes: formData.durationMinutes!,
@@ -82,7 +82,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
     } else {
         // Create new
         const task: Task = {
-            id: '', // Backend or service will generate
+            id: '', 
             title: formData.title,
             deadline: formData.deadline,
             priority: formData.priority || Priority.MEDIUM,
@@ -130,14 +130,14 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
         </div>
         <button
           onClick={handleAddNewClick}
-          className="flex items-center gap-2 bg-[var(--primary-600)] text-white px-5 py-2.5 rounded-xl hover:brightness-110 transition-all shadow-lg shadow-[var(--primary-600)]/20 font-medium active:scale-95"
+          className="flex items-center gap-2 bg-[var(--primary-600)] text-white px-5 py-2.5 rounded-xl hover:brightness-110 transition-all shadow-lg shadow-[var(--primary-600)]/20 font-medium active:scale-95 hover:-translate-y-0.5 duration-200"
         >
           <Plus size={20} strokeWidth={2.5} /> New Task
         </button>
       </div>
 
       {isFormOpen && (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-700 mb-10 animate-slide-up transition-colors">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-lg shadow-slate-200/50 dark:shadow-black/20 border border-slate-100 dark:border-slate-700 mb-10 animate-slide-up transition-colors duration-300">
           <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">
               {editingTaskId ? 'Edit Task' : 'Create New Task'}
           </h3>
@@ -195,8 +195,8 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
             </div>
           </div>
           <div className="mt-8 flex justify-end gap-3">
-            <button type="button" onClick={resetForm} className="px-6 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl font-medium transition-colors">Cancel</button>
-            <button type="submit" className="px-6 py-2.5 bg-[var(--primary-600)] text-white rounded-xl hover:brightness-110 shadow-md font-medium">
+            <button type="button" onClick={resetForm} className="px-6 py-2.5 text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-700 dark:hover:text-slate-200 rounded-xl font-medium transition-colors active:scale-95">Cancel</button>
+            <button type="submit" className="px-6 py-2.5 bg-[var(--primary-600)] text-white rounded-xl hover:brightness-110 shadow-md font-medium active:scale-95 transition-transform">
                 {editingTaskId ? 'Update Task' : 'Save Task'}
             </button>
           </div>
@@ -208,7 +208,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
               <button
                 key={t}
                 onClick={() => setFilter(t as any)}
-                className={`px-4 py-2 text-sm font-medium capitalize rounded-lg transition-all ${
+                className={`px-4 py-2 text-sm font-medium capitalize rounded-lg transition-all active:scale-95 ${
                     filter === t 
                     ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20' 
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
@@ -228,19 +228,19 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
         {sortedTasks.map(task => (
           <div 
             key={task.id} 
-            className={`group bg-white dark:bg-slate-800 p-5 rounded-2xl border transition-all duration-500 hover:shadow-lg hover:border-[var(--primary-200)] relative ${task.completed ? 'border-slate-100 dark:border-slate-700 opacity-60 bg-slate-50 dark:bg-slate-800/50' : 'border-slate-100 dark:border-slate-700 shadow-sm'} ${activeMenuId === task.id ? 'z-50' : ''}`}
+            className={`group bg-white dark:bg-slate-800 p-5 rounded-2xl border transition-all duration-300 ease-out hover:shadow-lg hover:border-[var(--primary-200)] relative hover:-translate-y-0.5 ${task.completed ? 'border-slate-100 dark:border-slate-700 opacity-60 bg-slate-50 dark:bg-slate-800/50' : 'border-slate-100 dark:border-slate-700 shadow-sm'} ${activeMenuId === task.id ? 'z-50' : ''}`}
           >
             {/* Progress Hint Bar for non-completed */}
-            {!task.completed && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary-500)] rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>}
+            {!task.completed && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary-500)] rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>}
 
             <div className="flex items-center gap-5">
-                <button onClick={() => onToggleTask(task.id)} className="text-slate-300 hover:text-[var(--primary-600)] transition-colors flex-shrink-0">
-                {task.completed ? <CheckCircle className="text-emerald-500 animate-pop" size={26} /> : <Circle size={26} strokeWidth={2} />}
+                <button onClick={() => onToggleTask(task.id)} className="text-slate-300 hover:text-[var(--primary-600)] transition-all duration-300 flex-shrink-0 active:scale-90">
+                {task.completed ? <CheckCircle className="text-emerald-500 animate-pop" size={26} /> : <Circle size={26} strokeWidth={2} className="hover:scale-110 transition-transform" />}
                 </button>
                 
                 <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between mb-1">
-                    <h3 className={`font-bold text-lg text-slate-800 dark:text-slate-100 truncate pr-4 ${task.completed ? 'line-through text-slate-500' : ''}`}>{task.title}</h3>
+                    <h3 className={`font-bold text-lg text-slate-800 dark:text-slate-100 truncate pr-4 transition-all duration-300 ${task.completed ? 'line-through text-slate-500' : ''}`}>{task.title}</h3>
                     {!task.completed && task.priority === Priority.URGENT && (
                         <div className="flex items-center gap-1 text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/30 px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider animate-pulse">
                             <AlertCircle size={14} /> Urgent
@@ -260,7 +260,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                     {!task.completed && (
                         <button 
                             onClick={() => onStartFocus(task)}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-400)] flex items-center justify-center hover:bg-[var(--primary-600)] hover:text-white transition-all transform hover:scale-110 shadow-sm group-hover:shadow-[var(--primary-200)] flex-shrink-0"
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-400)] flex items-center justify-center hover:bg-[var(--primary-600)] hover:text-white transition-all transform hover:scale-110 active:scale-95 shadow-sm group-hover:shadow-[var(--primary-200)] flex-shrink-0"
                             title="Start Focus Timer"
                         >
                             <Play size={20} fill="currentColor" className="ml-0.5" />
@@ -273,21 +273,21 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                             e.stopPropagation();
                             setActiveMenuId(activeMenuId === task.id ? null : task.id);
                         }}
-                        className="w-10 h-10 md:w-12 md:h-12 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors flex-shrink-0"
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors flex-shrink-0 active:scale-95"
                     >
                         <MoreVertical size={20} />
                     </button>
 
                     {/* Dropdown Menu */}
                     {activeMenuId === task.id && (
-                        <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-fade-in">
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 rounded-xl shadow-xl shadow-slate-200/50 dark:shadow-black/50 border border-slate-100 dark:border-slate-700 z-50 overflow-hidden animate-pop origin-top-right">
                             <button 
                                 type="button"
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     handleEditClick(task);
                                 }}
-                                className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2"
+                                className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center gap-2 transition-colors"
                             >
                                 <Edit2 size={16} /> Edit
                             </button>
@@ -298,7 +298,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                                     onDeleteTask(task.id);
                                     setActiveMenuId(null);
                                 }}
-                                className="w-full text-left px-4 py-3 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2"
+                                className="w-full text-left px-4 py-3 text-sm font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2 transition-colors"
                             >
                                 <Trash2 size={16} /> Delete
                             </button>
@@ -310,7 +310,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
         ))}
         
         {tasks.length === 0 && (
-          <div className="text-center py-16 text-slate-400 dark:text-slate-500 bg-white/50 dark:bg-slate-800/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-700">
+          <div className="text-center py-16 text-slate-400 dark:text-slate-500 bg-white/50 dark:bg-slate-800/50 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-700 animate-fade-in">
             <div className="bg-slate-50 dark:bg-slate-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300 dark:text-slate-500">
                 <Filter size={24} />
             </div>

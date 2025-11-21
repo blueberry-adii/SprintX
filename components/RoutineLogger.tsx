@@ -25,8 +25,9 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
       return;
     }
 
-    const newLog = { ...logData, id: '' } as RoutineLog; // ID handled by backend
+    const newLog = { ...logData, id: Date.now().toString() } as RoutineLog;
     addLog(newLog);
+    alert("Routine logged successfully!");
   };
 
   const moodOptions = [
@@ -67,13 +68,13 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
                   key={option.value}
                   type="button"
                   onClick={() => setLogData({ ...logData, moodRating: option.value })}
-                  className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-200 active:scale-95 hover:shadow-md ${
+                  className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-200 ${
                     logData.moodRating === option.value
                       ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 border-[var(--primary-500)] shadow-md scale-105'
-                      : 'bg-white dark:bg-slate-700 border-slate-100 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 hover:scale-105'
+                      : 'bg-white dark:bg-slate-700 border-slate-100 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600'
                   }`}
                 >
-                  <span className="text-2xl filter drop-shadow-sm transition-transform hover:scale-110" role="img" aria-label={option.label}>{option.emoji}</span>
+                  <span className="text-2xl filter drop-shadow-sm" role="img" aria-label={option.label}>{option.emoji}</span>
                   <span className={`text-[10px] font-bold uppercase tracking-wide ${logData.moodRating === option.value ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)]' : 'text-slate-400'}`}>
                     {option.label}
                   </span>
@@ -161,7 +162,7 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
 
           <button
             type="submit"
-            className="w-full bg-[var(--primary-600)] text-white font-bold py-4 rounded-2xl hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary-600)]/30 hover:shadow-xl active:scale-[0.98] active:shadow-sm"
+            className="w-full bg-[var(--primary-600)] text-white font-bold py-4 rounded-2xl hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary-600)]/30 hover:shadow-xl active:scale-[0.99]"
           >
             <Save size={20} />
             Save Daily Log
