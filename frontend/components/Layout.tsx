@@ -89,7 +89,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentTab, setTab }) 
                 }}
                 className={`w-full flex items-center ${isCollapsed && !mobileMenuOpen ? 'justify-center' : 'justify-start'} px-4 py-3.5 rounded-xl transition-all duration-200 group relative active:scale-95 ${
                   active 
-                    ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/20 text-[var(--primary-700)] dark:text-[var(--primary-200)] font-semibold shadow-sm' 
+                    ? 'bg-[var(--primary-50)] dark:!bg-slate-700 text-[var(--primary-700)] dark:!text-[var(--primary-100)] font-semibold shadow-sm' 
                     : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
                 title={isCollapsed ? item.label : ''}
@@ -97,7 +97,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentTab, setTab }) 
                 <Icon 
                   size={22} 
                   strokeWidth={active ? 2.5 : 2}
-                  className={`flex-shrink-0 transition-colors ${active ? 'text-[var(--primary-600)] dark:text-[var(--primary-400)]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} 
+                  className={`flex-shrink-0 transition-colors ${active ? 'text-[var(--primary-600)] dark:!text-[var(--primary-400)]' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-300'}`} 
                 />
                 
                 <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out ${(!isCollapsed || mobileMenuOpen) ? 'w-40 opacity-100 ml-3' : 'w-0 opacity-0 ml-0'}`}>

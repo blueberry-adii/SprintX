@@ -53,13 +53,34 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
     setEditedProfile(prev => ({ ...prev, goals: prev.goals.filter((_, i) => i !== index) }));
   };
 
+  // Exam Management Functions
+  const addExam = () => {
+      setEditedProfile(prev => ({
+          ...prev,
+          examDates: [...prev.examDates, { subject: '', date: '' }]
+      }));
+  };
+
+  const updateExam = (index: number, field: 'subject' | 'date', value: string) => {
+      const newExams = [...editedProfile.examDates];
+      newExams[index] = { ...newExams[index], [field]: value };
+      setEditedProfile(prev => ({ ...prev, examDates: newExams }));
+  };
+
+  const removeExam = (index: number) => {
+      setEditedProfile(prev => ({
+          ...prev,
+          examDates: prev.examDates.filter((_, i) => i !== index)
+      }));
+  };
+
   return (
     <div className="max-w-2xl mx-auto bg-white dark:bg-slate-800 p-8 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 relative animate-fade-in transition-colors duration-300">
       <div className="absolute top-6 right-6 flex gap-2">
         {isEditing ? (
             <>
              <button 
-                onClick={() => setIsEditing(false)} 
+                onClick={() => { setIsEditing(false); setEditedProfile(profile); }} 
                 className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-500 dark:text-slate-400 transition-colors"
                 title="Cancel"
             >
@@ -171,14 +192,62 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
         </div>
 
         <div className="pt-6 border-t border-slate-100 dark:border-slate-700">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Upcoming Exams</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Upcoming Exams</h3>
+            {isEditing && (
+                <button onClick={addExam} className="text-sm text-[var(--primary-600)] font-medium flex items-center gap-1 hover:underline">
+                    <Plus size={16} /> Add Exam
+                </button>
+            )}
+          </div>
+
           <div className="grid gap-3">
-            {profile.examDates.map((exam, i) => (
-              <div key={i} className="flex justify-between items-center p-4 bg-white dark:bg-slate-700/30 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span className="font-medium text-slate-700 dark:text-slate-200">{exam.subject}</span>
-                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 text-sm rounded-full font-medium">{exam.date}</span>
-              </div>
-            ))}
+            {isEditing ? (
+                editedProfile.examDates.length > 0 ? (
+                    editedProfile.examDates.map((exam, i) => (
+                    <div key={i} className="flex gap-3 items-start animate-slide-up">
+                        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <input 
+                                type="text"
+                                placeholder="Subject (e.g. Calculus)"
+                                className="px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)]/20 focus:border-[var(--primary-500)] outline-none transition-all bg-slate-50 dark:bg-slate-900 dark:text-white"
+                                value={exam.subject}
+                                onChange={(e) => updateExam(i, 'subject', e.target.value)}
+                            />
+                            <input 
+                                type="date"
+                                className="px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)]/20 focus:border-[var(--primary-500)] outline-none transition-all bg-slate-50 dark:bg-slate-900 dark:text-white"
+                                value={exam.date}
+                                onChange={(e) => updateExam(i, 'date', e.target.value)}
+                            />
+                        </div>
+                        <button 
+                            onClick={() => removeExam(i)}
+                            className="p-3 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors mt-px"
+                            title="Remove Exam"
+                        >
+                            <Trash2 size={18} />
+                        </button>
+                    </div>
+                    ))
+                ) : (
+                    <div className="text-slate-400 text-sm italic text-center py-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                        Click 'Add Exam' to track your test dates.
+                    </div>
+                )
+            ) : (
+                <>
+                    {profile.examDates.map((exam, i) => (
+                    <div key={i} className="flex justify-between items-center p-4 bg-white dark:bg-slate-700/30 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <span className="font-medium text-slate-700 dark:text-slate-200">{exam.subject}</span>
+                        <span className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 text-sm rounded-full font-medium">
+                            {exam.date ? new Date(exam.date).toLocaleDateString() : 'TBD'}
+                        </span>
+                    </div>
+                    ))}
+                    {profile.examDates.length === 0 && <div className="text-slate-400 italic p-4 text-center bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">No upcoming exams added.</div>}
+                </>
+            )}
           </div>
         </div>
       </div>
@@ -317,7 +386,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      {currentTab === 'dashboard' && <Dashboard logs={logs} tasks={tasks} userName={profile.name} />}
+      {currentTab === 'dashboard' && <Dashboard logs={logs} tasks={tasks} userName={profile.name} onNavigate={setCurrentTab} />}
       {currentTab === 'tasks' && (
         <TaskManager 
           tasks={tasks} 
@@ -334,6 +403,7 @@ const App: React.FC = () => {
       */}
       <PomodoroView 
         tasks={tasks} 
+        logs={logs}
         initialTask={focusTask} 
         isMinimized={currentTab !== 'pomodoro'}
         onMaximize={() => setCurrentTab('pomodoro')}

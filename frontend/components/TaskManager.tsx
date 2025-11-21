@@ -210,7 +210,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                 onClick={() => setFilter(t as any)}
                 className={`px-4 py-2 text-sm font-medium capitalize rounded-lg transition-all active:scale-95 ${
                     filter === t 
-                    ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20' 
+                    ? 'text-[var(--primary-700)] dark:text-white bg-[var(--primary-50)] dark:bg-[var(--primary-600)]' 
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
@@ -260,7 +260,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                     {!task.completed && (
                         <button 
                             onClick={() => onStartFocus(task)}
-                            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-400)] flex items-center justify-center hover:bg-[var(--primary-600)] hover:text-white transition-all transform hover:scale-110 active:scale-95 shadow-sm group-hover:shadow-[var(--primary-200)] flex-shrink-0"
+                            className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/20 text-[var(--primary-600)] dark:text-[var(--primary-400)] flex items-center justify-center hover:bg-[var(--primary-600)] hover:text-white transition-all transform hover:scale-110 active:scale-95 shadow-sm group-hover:shadow-[var(--primary-200)] flex-shrink-0"
                             title="Start Focus Timer"
                         >
                             <Play size={20} fill="currentColor" className="ml-0.5" />
@@ -273,7 +273,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                             e.stopPropagation();
                             setActiveMenuId(activeMenuId === task.id ? null : task.id);
                         }}
-                        className="w-10 h-10 md:w-12 md:h-12 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors flex-shrink-0 active:scale-95"
+                        className="w-10 h-10 md:w-12 md:h-12 rounded-full text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center transition-colors flex-shrink-0 active:scale-95"
                     >
                         <MoreVertical size={20} />
                     </button>

@@ -8,8 +8,15 @@ interface RoutineLoggerProps {
 }
 
 export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) => {
+  // Fix: Use local time for 'today' to avoid timezone issues preventing logging late at night
+  const getLocalToday = () => {
+    const d = new Date();
+    return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+  };
+  const today = getLocalToday();
+
   const [logData, setLogData] = useState<Partial<RoutineLog>>({
-    date: new Date().toISOString().split('T')[0],
+    date: today,
     wakeUpTime: '07:00',
     sleepTime: '23:00',
     studyHours: 0,
@@ -20,6 +27,12 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (logData.date && logData.date > today) {
+      alert("You cannot log routines for future dates. Please select today or a past date.");
+      return;
+    }
+
     if (logs.some(l => l.date === logData.date)) {
       alert("A log for this date already exists!");
       return;
@@ -52,6 +65,7 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
             <input
               type="date"
               required
+              max={today}
               className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900 transition-all"
               value={logData.date}
               onChange={e => setLogData({ ...logData, date: e.target.value })}
@@ -161,7 +175,7 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
 
           <button
             type="submit"
-            className="w-full bg-[var(--primary-600)] text-white font-bold py-4 rounded-2xl hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary-600)]/30 hover:shadow-xl active:scale-[0.98] active:shadow-sm"
+            className="w-full bg-[var(--primary-600)] text-white font-bold py-4 rounded-2xl hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[var(--primary-600)]/30 hover:shadow-xl active:scale-[0.98]"
           >
             <Save size={20} />
             Save Daily Log

@@ -5,8 +5,12 @@ import { Task, RoutineLog, UserProfile, AIAnalysisResult } from "../types";
 const MODEL_NAME = 'gemini-2.5-flash';
 
 const getAIClient = () => {
-  // Integrated API Key for Hackathon Project
-  const apiKey = 'AIzaSyBZGekfu3xn0yST-Q3SoQICzhYKiJ51XKA';
+  // Fix: Use process.env.API_KEY exclusively
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.error("API Key is missing in environment variables");
+    throw new Error("API Key missing");
+  }
   return new GoogleGenAI({ apiKey });
 };
 
@@ -60,7 +64,9 @@ export const analyzeProductivity = async (
       }
     });
 
-    const result = JSON.parse(response.text || "{}");
+    let cleanText = response.text || "{}";
+    cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const result = JSON.parse(cleanText);
     return result as AIAnalysisResult;
 
   } catch (error) {
@@ -84,5 +90,50 @@ export const getQuickAdvice = async (query: string, context: string): Promise<st
     return response.text || "I couldn't generate advice at this moment.";
   } catch (e) {
     return "Service unavailable. Please check your connection or API key.";
+  }
+};
+
+export const getDailyScoreAnalysis = async (
+  date: string,
+  stats: { studyHours: number; mood: number; completed: number; total: number; score: number }
+): Promise<{ analysis: string; tip: string }> => {
+  try {
+    const ai = getAIClient();
+    const prompt = `
+      Analyze the daily productivity score of ${stats.score}/100 for ${date}.
+      Metrics:
+      - Study Hours: ${stats.studyHours}
+      - Mood Rating: ${stats.mood}/10
+      - Tasks Completed: ${stats.completed}/${stats.total}
+
+      Output Requirements:
+      1. analysis: A 2-sentence psychological analysis of why the score is high/low based on the correlation between mood, study time, and task completion. Be specific.
+      2. tip: A single, short, high-impact actionable tip for the next day to improve or maintain momentum.
+      
+      Tone: Professional, insightful, and encouraging.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            analysis: { type: Type.STRING },
+            tip: { type: Type.STRING }
+          }
+        }
+      }
+    });
+
+    let cleanText = response.text || "";
+    cleanText = cleanText.replace(/```json/g, '').replace(/```/g, '').trim();
+    
+    return JSON.parse(cleanText || '{"analysis": "No analysis available.", "tip": "Keep going!"}');
+  } catch (error) {
+    console.error(error);
+    return { analysis: "Unable to analyze right now.", tip: "Try again later." };
   }
 };

@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Task } from '../types';
-import { Play, Pause, RotateCcw, CheckCircle, Zap, Coffee, Brain, Maximize2, X } from 'lucide-react';
+import { RoutineLog, Task } from '../types';
+import { Play, Pause, RotateCcw, CheckCircle, Zap, Coffee, Brain, Maximize2, X, Clock } from 'lucide-react';
 
 interface PomodoroViewProps {
   tasks: Task[];
+  logs: RoutineLog[];
   initialTask?: Task | null;
   isMinimized?: boolean;
   onMaximize?: () => void;
 }
 
-export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, isMinimized = false, onMaximize }) => {
+export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, logs, initialTask, isMinimized = false, onMaximize }) => {
   const [selectedTaskId, setSelectedTaskId] = useState<string>(initialTask?.id || '');
   const [timeLeft, setTimeLeft] = useState(25 * 60);
   const [isActive, setIsActive] = useState(false);
@@ -25,6 +26,11 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
   }));
   const [isDragging, setIsDragging] = useState(false);
   const dragStartOffset = useRef({ x: 0, y: 0 });
+
+  // Calculate today's study time
+  const today = new Date().toISOString().split('T')[0];
+  const todayLog = logs.find(l => l.date === today);
+  const totalStudyHours = todayLog ? todayLog.studyHours : 0;
 
   useEffect(() => {
     if (initialTask) {
@@ -116,7 +122,7 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
   }
 
   const getBgGradient = () => {
-      if (mode === 'focus') return 'from-[var(--primary-50)] dark:from-[var(--primary-900)]/30';
+      if (mode === 'focus') return 'from-[var(--primary-50)] dark:from-[var(--primary-600)]/20';
       if (mode === 'short') return 'from-sky-50 dark:from-sky-900/30';
       return 'from-violet-50 dark:from-violet-900/30';
   }
@@ -276,6 +282,25 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
 
           {/* Task Selection & Stats */}
           <div className="lg:col-span-5 space-y-6 flex flex-col h-auto lg:h-full">
+             
+             {/* Daily Focus Stats */}
+             <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex items-center justify-between shadow-sm animate-fade-in">
+                <div className="flex items-center gap-4">
+                   <div className="p-3 bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/20 text-[var(--primary-600)] dark:text-[var(--primary-400)] rounded-xl">
+                      <Clock size={24} />
+                   </div>
+                   <div>
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Daily Focus</div>
+                      <div className="text-2xl font-bold text-slate-800 dark:text-white">{totalStudyHours.toFixed(2)}<span className="text-sm text-slate-400 font-medium ml-1">hrs</span></div>
+                   </div>
+                </div>
+                <div className="text-right hidden sm:block">
+                    <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                       Logged Today
+                    </div>
+                </div>
+             </div>
+
              <div className={`rounded-3xl p-8 text-white shadow-lg transition-colors duration-500 flex-shrink-0 ${mode === 'focus' ? 'bg-[var(--primary-600)]' : mode === 'short' ? 'bg-sky-500' : 'bg-violet-500'}`}>
                  <div className="flex items-center gap-2 mb-4 opacity-90">
                     <div className="bg-white/20 p-1.5 rounded-lg"><Zap size={20} /></div>
@@ -302,15 +327,15 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
                     {tasks.filter(t => !t.completed).map(task => (
                         <button
                             key={task.id}
-                            onClick={() => setSelectedTaskId(task.id)}
+                            onClick={() => setSelectedTaskId(selectedTaskId === task.id ? '' : task.id)}
                             className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center justify-between group ${
                                 selectedTaskId === task.id
-                                ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 border-[var(--primary-500)]/50 shadow-sm'
+                                ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/10 border-[var(--primary-500)]/50 shadow-sm'
                                 : 'bg-white dark:bg-slate-700/30 border-slate-100 dark:border-slate-700 hover:border-[var(--primary-200)] hover:bg-slate-50 dark:hover:bg-slate-700'
                             }`}
                         >
                             <div>
-                                <div className={`font-bold text-sm ${selectedTaskId === task.id ? 'text-[var(--primary-900)] dark:text-[var(--primary-100)]' : 'text-slate-700 dark:text-slate-200'}`}>
+                                <div className={`font-bold text-sm ${selectedTaskId === task.id ? 'text-[var(--primary-700)] dark:text-[var(--primary-200)]' : 'text-slate-700 dark:text-slate-200'}`}>
                                     {task.title}
                                 </div>
                                 <div className="text-xs text-slate-400 mt-1 font-medium">{task.category}</div>
