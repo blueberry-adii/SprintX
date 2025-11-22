@@ -16,7 +16,7 @@ import insightsRouter from "./routes/insights.route.js";
 import settingsRouter from "./routes/settings.route.js";
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT;
 
 app.use(
   cors({
@@ -50,7 +50,7 @@ const start = async () => {
 
   app.use(errorMiddleware);
 
-  app.listen(PORT, "0.0.0.0", () => {
+  app.listen(PORT, () => {
     console.log(`Server running on port: ${PORT}`);
   });
 };
