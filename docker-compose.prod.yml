@@ -54,7 +54,6 @@ services:
     mem_reservation: 500m
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./mysql-lowmem.cnf:/etc/mysql/conf.d/mysql-lowmem.cnf
     networks:
       - hackathon-net
 
