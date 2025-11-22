@@ -50,6 +50,8 @@ export interface UserProfile {
 }
 
 export interface AIAnalysisResult {
+  id?: string;
+  createdAt?: string;
   insights: string[];
   suggestedSchedule: { time: string; activity: string; note?: string }[];
   productivityScore: number;

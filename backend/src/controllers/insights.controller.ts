@@ -7,7 +7,7 @@ import { ApiError } from "../utils/ApiError.js";
 import type { AIInsight } from "../types/user.js";
 
 const getAIClient = () => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     console.error("API Key is missing in environment variables");
     throw new ApiError(500, "API Key missing");
@@ -18,7 +18,7 @@ const getAIClient = () => {
 
 export const getInsights = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
 
     const [rows] = await db.query(
       "SELECT recommendations FROM users WHERE uid = ?",
@@ -26,7 +26,9 @@ export const getInsights = asyncHandler(
     );
 
     const user = (rows as any[])[0];
-    const recs = JSON.parse(user?.recommendations || "[]");
+    const recs = user?.recommendations
+      ? (typeof user.recommendations === 'string' ? JSON.parse(user.recommendations) : user.recommendations)
+      : [];
 
     return res.status(200).json(new ApiResponse(200, recs, "Insights fetched"));
   }
@@ -34,7 +36,7 @@ export const getInsights = asyncHandler(
 
 export const generateInsights = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const uid = (req as any).uid;
+    const uid = (req as any).user.uid;
 
     const model = getAIClient().getGenerativeModel({
       model: "gemini-2.5-flash",
@@ -69,19 +71,26 @@ export const generateInsights = asyncHandler(
       [uid]
     );
     const user = (rows as any[])[0];
-    const profile = JSON.parse(user || "[]");
 
-    const [rows2] = await db.query(
+    // Parse JSON fields safely
+    const profile = user ? {
+      full_name: user.full_name,
+      academic_goals: typeof user.academic_goals === 'string' ? JSON.parse(user.academic_goals) : user.academic_goals,
+      upcoming_exams: typeof user.upcoming_exams === 'string' ? JSON.parse(user.upcoming_exams) : user.upcoming_exams,
+      recommendations: typeof user.recommendations === 'string' ? JSON.parse(user.recommendations) : user.recommendations
+    } : {};
+
+    const [taskRows] = await db.query(
       "SELECT title, deadline, duration_mins, priority, category, status FROM tasks WHERE uid = ?",
       [uid]
     );
-    const tasks = JSON.parse((rows2 as any[])[0] || []);
+    const tasks = taskRows as any[];
 
-    const [rows3] = await db.query(
+    const [logRows] = await db.query(
       "SELECT log_date, felt_today, study_hours, screen_hours, exercise_mins, wake_up_time, sleep_time, wellbeing_score FROM daily_routine WHERE uid = ?",
       [uid]
     );
-    const logs = JSON.parse((rows3 as any[])[0] || []);
+    const logs = logRows as any[];
 
     const prompt = `
       Act as an elite Student Productivity Coach. Analyze the following data:
@@ -99,21 +108,34 @@ export const generateInsights = asyncHandler(
     const response = await model.generateContent(prompt);
     const aiData = JSON.parse(response.response.text());
 
+    // Add metadata for history
+    aiData.id = Date.now().toString();
+    aiData.createdAt = new Date().toISOString();
+
+    console.log(`[GenerateInsights] UID: ${uid}`);
+    console.log(`[GenerateInsights] Existing recommendations raw:`, user?.recommendations);
+
     let recs: any[] = [];
 
     if (user?.recommendations) {
-      recs = JSON.parse(user.recommendations);
+      recs = typeof user.recommendations === 'string' ? JSON.parse(user.recommendations) : user.recommendations;
     }
+
+    console.log(`[GenerateInsights] Parsed existing recs count: ${recs.length}`);
 
     if (recs.length >= 10) {
       recs.shift();
     }
     recs.push(aiData);
 
-    await db.query("UPDATE users SET recommendations = ? WHERE uid = ?", [
+    console.log(`[GenerateInsights] New recs count to save: ${recs.length}`);
+
+    const [updateResult] = await db.query("UPDATE users SET recommendations = ? WHERE uid = ?", [
       JSON.stringify(recs),
       uid,
     ]);
+
+    console.log(`[GenerateInsights] Update result:`, updateResult);
 
     return res.json(new ApiResponse(200, aiData, "New insight generated"));
   }

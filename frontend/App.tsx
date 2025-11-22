@@ -178,14 +178,64 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
         </div>
 
         <div className="pt-6 border-t border-slate-100 dark:border-slate-700">
-          <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100 mb-4">Upcoming Exams</h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">Upcoming Exams</h3>
+            {isEditing && (
+              <button
+                onClick={() => setEditedProfile(prev => ({ ...prev, examDates: [...prev.examDates, { subject: '', date: '' }] }))}
+                className="text-sm text-[var(--primary-600)] font-medium flex items-center gap-1 hover:underline"
+              >
+                <Plus size={16} /> Add Exam
+              </button>
+            )}
+          </div>
           <div className="grid gap-3">
-            {profile.examDates.map((exam, i) => (
-              <div key={i} className="flex justify-between items-center p-4 bg-white dark:bg-slate-700/30 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-                <span className="font-medium text-slate-700 dark:text-slate-200">{exam.subject}</span>
-                <span className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 text-sm rounded-full font-medium">{exam.date}</span>
+            {editedProfile.examDates.map((exam, i) => (
+              <div key={i} className="flex justify-between items-center p-4 bg-white dark:bg-slate-700/30 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm group">
+                {isEditing ? (
+                  <div className="flex-1 flex gap-3 items-center">
+                    <input
+                      type="text"
+                      placeholder="Subject"
+                      value={exam.subject}
+                      onChange={e => {
+                        const newExams = [...editedProfile.examDates];
+                        newExams[i] = { ...newExams[i], subject: e.target.value };
+                        setEditedProfile(prev => ({ ...prev, examDates: newExams }));
+                      }}
+                      className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)]/20 outline-none bg-slate-50 dark:bg-slate-900 dark:text-white"
+                    />
+                    <input
+                      type="date"
+                      value={exam.date}
+                      onChange={e => {
+                        const newExams = [...editedProfile.examDates];
+                        newExams[i] = { ...newExams[i], date: e.target.value };
+                        setEditedProfile(prev => ({ ...prev, examDates: newExams }));
+                      }}
+                      className="w-40 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)]/20 outline-none bg-slate-50 dark:bg-slate-900 dark:text-white"
+                    />
+                    <button
+                      onClick={() => setEditedProfile(prev => ({ ...prev, examDates: prev.examDates.filter((_, idx) => idx !== i) }))}
+                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      title="Remove Exam"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <span className="font-medium text-slate-700 dark:text-slate-200">{exam.subject}</span>
+                    <span className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 text-sm rounded-full font-medium">{exam.date}</span>
+                  </>
+                )}
               </div>
             ))}
+            {editedProfile.examDates.length === 0 && (
+              <div className="text-center py-8 text-slate-400 italic bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                No upcoming exams added yet.
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -406,7 +456,7 @@ const DashboardLayout: React.FC = () => {
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
   if (!token) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
   return <>{children}</>;
 };

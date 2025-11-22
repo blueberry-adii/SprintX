@@ -14,7 +14,9 @@ export const getAuthHeaders = () => {
 const handleResponse = async (res: Response) => {
   if (!res.ok) {
     if (res.status === 401) {
-      window.dispatchEvent(new Event("auth-error"));
+      localStorage.removeItem("token");
+      window.location.href = "/";
+      throw new Error("Session expired");
     }
 
     let errorMessage = res.statusText;
@@ -33,7 +35,7 @@ const handleResponse = async (res: Response) => {
 };
 
 export const api = {
-  get: async (endpoint: string) => {
+  get: async <T = any>(endpoint: string): Promise<T> => {
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, {
         headers: getAuthHeaders(),
@@ -49,7 +51,7 @@ export const api = {
     }
   },
 
-  post: async (endpoint: string, body: any) => {
+  post: async <T = any>(endpoint: string, body: any): Promise<T> => {
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "POST",
@@ -67,7 +69,7 @@ export const api = {
     }
   },
 
-  put: async (endpoint: string, body: any) => {
+  put: async <T = any>(endpoint: string, body: any): Promise<T> => {
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "PUT",
@@ -85,7 +87,7 @@ export const api = {
     }
   },
 
-  patch: async (endpoint: string, body: any) => {
+  patch: async <T = any>(endpoint: string, body: any): Promise<T> => {
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "PATCH",
@@ -103,7 +105,7 @@ export const api = {
     }
   },
 
-  delete: async (endpoint: string) => {
+  delete: async <T = any>(endpoint: string): Promise<T> => {
     try {
       const res = await fetch(`${API_BASE}${endpoint}`, {
         method: "DELETE",

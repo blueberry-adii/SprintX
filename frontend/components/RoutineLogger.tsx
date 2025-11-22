@@ -9,7 +9,10 @@ interface RoutineLoggerProps {
 
 export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) => {
   const [logData, setLogData] = useState<Partial<RoutineLog>>({
-    date: new Date().toISOString().split('T')[0],
+    date: (() => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    })(),
     wakeUpTime: '07:00',
     sleepTime: '23:00',
     studyHours: 0,
@@ -67,11 +70,10 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
                   key={option.value}
                   type="button"
                   onClick={() => setLogData({ ...logData, moodRating: option.value })}
-                  className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-200 active:scale-95 hover:shadow-md ${
-                    logData.moodRating === option.value
-                      ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 border-[var(--primary-500)] shadow-md scale-105'
-                      : 'bg-white dark:bg-slate-700 border-slate-100 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 hover:scale-105'
-                  }`}
+                  className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-200 active:scale-95 hover:shadow-md ${logData.moodRating === option.value
+                    ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 border-[var(--primary-500)] shadow-md scale-105'
+                    : 'bg-white dark:bg-slate-700 border-slate-100 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 hover:scale-105'
+                    }`}
                 >
                   <span className="text-2xl filter drop-shadow-sm transition-transform hover:scale-110" role="img" aria-label={option.label}>{option.emoji}</span>
                   <span className={`text-[10px] font-bold uppercase tracking-wide ${logData.moodRating === option.value ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)]' : 'text-slate-400'}`}>
@@ -101,7 +103,7 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Screen (hrs)</label>
               <div className="relative">
-                 <Monitor className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500" size={18} />
+                <Monitor className="absolute left-4 top-1/2 -translate-y-1/2 text-indigo-500" size={18} />
                 <input
                   type="number"
                   min="0"
@@ -131,32 +133,32 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
           </div>
 
           <div className="grid grid-cols-2 gap-5">
-             <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Wake Up</label>
-                <div className="relative">
-                    <Sun className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500" size={18} />
-                    <input 
-                        type="time" 
-                        required
-                        className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
-                        value={logData.wakeUpTime}
-                        onChange={e => setLogData({...logData, wakeUpTime: e.target.value})}
-                    />
-                </div>
-             </div>
-             <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Sleep</label>
-                <div className="relative">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🌙</div>
-                    <input 
-                        type="time" 
-                        required
-                        className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
-                        value={logData.sleepTime}
-                        onChange={e => setLogData({...logData, sleepTime: e.target.value})}
-                    />
-                </div>
-             </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Wake Up</label>
+              <div className="relative">
+                <Sun className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500" size={18} />
+                <input
+                  type="time"
+                  required
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
+                  value={logData.wakeUpTime}
+                  onChange={e => setLogData({ ...logData, wakeUpTime: e.target.value })}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Sleep</label>
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🌙</div>
+                <input
+                  type="time"
+                  required
+                  className="w-full pl-11 pr-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
+                  value={logData.sleepTime}
+                  onChange={e => setLogData({ ...logData, sleepTime: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
 
           <button
@@ -167,6 +169,63 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
             Save Daily Log
           </button>
         </form>
+      </div>
+
+      {/* Recent Logs Display */}
+      <div className="mt-12">
+        <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-6">Recent Logs</h3>
+        <div className="space-y-4">
+          {logs.length === 0 ? (
+            <div className="text-center p-8 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 text-slate-500 dark:text-slate-400">
+              No routine logs yet. Start tracking your days!
+            </div>
+          ) : (
+            logs.slice(0, 10).map((log, index) => (
+              <div key={index} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                  <div>
+                    <div className="text-sm font-bold text-[var(--primary-600)] uppercase tracking-wider mb-1">
+                      {new Date(log.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl" role="img" aria-label="mood">
+                        {log.moodRating >= 10 ? '🤩' : log.moodRating >= 8 ? '🙂' : log.moodRating >= 6 ? '😐' : log.moodRating >= 4 ? '🙁' : '😫'}
+                      </span>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">
+                        {log.moodRating >= 10 ? 'Great Day' : log.moodRating >= 8 ? 'Good Day' : log.moodRating >= 6 ? 'Okay Day' : log.moodRating >= 4 ? 'Bad Day' : 'Terrible Day'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-4 text-sm text-slate-600 dark:text-slate-300">
+                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700/50 px-3 py-1.5 rounded-lg">
+                      <Sun size={14} className="text-amber-500" />
+                      <span>{log.wakeUpTime}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-700/50 px-3 py-1.5 rounded-lg">
+                      <span className="text-slate-400">🌙</span>
+                      <span>{log.sleepTime}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100 dark:border-slate-700">
+                  <div className="text-center">
+                    <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Study</div>
+                    <div className="font-semibold text-slate-700 dark:text-slate-200">{log.studyHours}h</div>
+                  </div>
+                  <div className="text-center border-l border-slate-100 dark:border-slate-700">
+                    <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Screen</div>
+                    <div className="font-semibold text-slate-700 dark:text-slate-200">{log.screenTimeHours}h</div>
+                  </div>
+                  <div className="text-center border-l border-slate-100 dark:border-slate-700">
+                    <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">Exercise</div>
+                    <div className="font-semibold text-slate-700 dark:text-slate-200">{log.exerciseMinutes}m</div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

@@ -165,11 +165,32 @@ export const storageService = {
 
     try {
       const response = await api.get('/routines/latest');
-      const logs = response.data;
-      if (!Array.isArray(logs)) {
-        console.error("Invalid logs format received from API", logs);
+      const logsData = response.data;
+
+      if (!Array.isArray(logsData)) {
+        console.error("Invalid logs format received from API", logsData);
         return [];
       }
+
+      const moodMapReverse: Record<string, number> = {
+        'Terrible': 2,
+        'Bad': 4,
+        'Okay': 6,
+        'Good': 8,
+        'Great': 10
+      };
+
+      const logs: RoutineLog[] = logsData.map((log: any) => ({
+        id: log.id?.toString() || '',
+        date: log.log_date,
+        wakeUpTime: log.wake_up_time,
+        sleepTime: log.sleep_time,
+        studyHours: Number(log.study_hours) || 0,
+        screenTimeHours: Number(log.screen_hours) || 0,
+        exerciseMinutes: Number(log.exercise_mins) || 0,
+        moodRating: typeof log.felt_today === 'string' ? (moodMapReverse[log.felt_today] || 6) : (log.felt_today || 6)
+      }));
+
       saveToCache(LOGS_KEY, logs);
       return logs;
     } catch (error) {
@@ -180,12 +201,31 @@ export const storageService = {
 
   saveLog: async (log: RoutineLog): Promise<RoutineLog> => {
     try {
-      const response = await api.post('/routines', log);
-      const savedLog = response.data;
+      const moodMap: Record<number, string> = {
+        2: 'Terrible',
+        4: 'Bad',
+        6: 'Okay',
+        8: 'Good',
+        10: 'Great'
+      };
+
+      const backendLog = {
+        log_date: log.date,
+        felt_today: moodMap[log.moodRating] || 'Okay',
+        study_hours: log.studyHours,
+        screen_hours: log.screenTimeHours,
+        exercise_mins: log.exerciseMinutes,
+        wake_up_time: log.wakeUpTime,
+        sleep_time: log.sleepTime
+      };
+
+      const response = await api.post('/routines', backendLog);
+      const savedLog = { ...log };
 
       // Update cache - prepend new log
       const currentLogs = getFromCache<RoutineLog[]>(LOGS_KEY) || [];
-      const updatedLogs = [savedLog, ...currentLogs];
+      const filteredLogs = currentLogs.filter(l => l.date !== log.date);
+      const updatedLogs = [savedLog, ...filteredLogs];
       saveToCache(LOGS_KEY, updatedLogs);
 
       return savedLog;
@@ -227,14 +267,18 @@ export const storageService = {
 
   saveProfile: async (profile: UserProfile): Promise<UserProfile> => {
     try {
-      // Create a copy of profile to avoid mutating the original
-      const profileToSend = { ...profile };
-      // Remove settings from the payload if the backend doesn't support updating them via this endpoint
-      const { settings, ...rest } = profileToSend as any;
+      // Map frontend camelCase to backend snake_case
+      const backendProfile = {
+        full_name: profile.name,
+        academic_goals: profile.goals,
+        upcoming_exams: profile.examDates,
+        pfp_url: profile.profilePicture
+        // settings are handled via separate endpoints
+      };
 
-      const response = await api.put('/auth/profile', rest);
-      // The response might not contain the full profile, so we merge with local state or just return what we sent
-      // But to be safe and keep cache consistent:
+      await api.put('/auth/profile', backendProfile);
+
+      // Update cache
       const updatedProfile = { ...profile };
       saveToCache(PROFILE_KEY, updatedProfile);
       return updatedProfile;

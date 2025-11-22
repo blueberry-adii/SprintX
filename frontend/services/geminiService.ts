@@ -1,9 +1,5 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { Task, RoutineLog, UserProfile, AIAnalysisResult } from "../types";
-import axios, { AxiosResponse } from "axios";
-
-const MODEL_NAME = "gemini-2.5-flash";
-let token = "temp";
+import { api } from "./api";
 
 export const analyzeProductivity = async (
   tasks: Task[],
@@ -11,13 +7,12 @@ export const analyzeProductivity = async (
   profile: UserProfile
 ): Promise<AIAnalysisResult> => {
   try {
-    const response = await axios.post<{ data: AIAnalysisResult }>(
-      "http://localhost:5000/api/v1/insights/generate",
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
+    const response = await api.post<{ data: AIAnalysisResult }>(
+      "/insights/generate",
+      {}
     );
 
-    return response.data.data as AIAnalysisResult;
+    return response.data as AIAnalysisResult;
   } catch (error) {
     console.error("Gemini Analysis Failed", error);
     // Fallback mock data to prevent app crash if API fails
@@ -39,15 +34,12 @@ export const getQuickAdvice = async (
   context: string
 ): Promise<string> => {
   try {
-    const response = await axios.post<{ data: string }>(
-      "http://localhost:5000/api/v1/insights/chat",
-      { query, context },
-      { headers: { Authorization: `Bearer ${token}` } }
+    const response = await api.post<{ data: string }>(
+      "/insights/chat",
+      { query, context }
     );
-    return response.data.data || "I couldn't generate advice at this moment.";
+    return response.data || "I couldn't generate advice at this moment.";
   } catch (e) {
     return "Service unavailable. Please check your connection or API key.";
   }
 };
-
-//
