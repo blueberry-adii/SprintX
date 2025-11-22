@@ -209,7 +209,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
             key={t}
             onClick={() => setFilter(t as any)}
             className={`px-4 py-2 text-sm font-medium capitalize rounded-lg transition-all active:scale-95 ${filter === t
-              ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20'
+              ? 'text-[var(--primary-700)] dark:text-[var(--primary-700)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
           >
