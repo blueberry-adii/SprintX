@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5000/api/v1";
+const API_BASE = "http://backend:5000/api/v1";
 
 export const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
