@@ -26,8 +26,12 @@ app.use(
       "http://98.130.52.208:5173",
     ],
     credentials: true,
+    preflightContinue: true,
+    optionsSuccessStatus: 204,
   })
 );
+
+app.options("/*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
