@@ -169,7 +169,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, sta
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
           <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/10 text-[var(--primary-600)] dark:text-[var(--primary-300)] rounded-xl group-hover:scale-110 transition-transform duration-300">
+            <div className="p-3 bg-[var(--primary-50)] text-[var(--primary-700)] rounded-xl group-hover:scale-110 transition-transform duration-300">
               <Clock size={24} />
             </div>
             <h3 className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wide">Avg. Study</h3>
