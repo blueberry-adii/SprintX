@@ -2,7 +2,7 @@
 
 StudentFlow is a comprehensive student productivity application designed to help students manage tasks, track daily routines, and gain insights into their study habits. It features a modern, responsive UI and a robust backend API.
 
-- [Click here (Hosted on AWS EC2 t3.small)](http://)
+- [Click here (Hosted on AWS EC2 t3.small)](http://98.130.52.208:5173)
 - [Demo Video](https://drive.google.com/drive/folders/1hklEpm23_jBYWJU8FBpL48gk7i3Dueur?usp=sharing)
 
 ![StudentFlow Dashboard](./docs/ss/dashboard_screenshot.png)
