@@ -259,7 +259,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                 {!task.completed && (
                   <button
                     onClick={() => onStartFocus(task)}
-                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-400)] flex items-center justify-center hover:bg-[var(--primary-600)] hover:text-white transition-all transform hover:scale-110 active:scale-95 shadow-sm group-hover:shadow-[var(--primary-200)] flex-shrink-0"
+                    className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--primary-50)] text-[var(--primary-600)] flex items-center justify-center hover:bg-[var(--primary-600)] hover:text-white transition-all transform hover:scale-110 active:scale-95 shadow-sm group-hover:shadow-[var(--primary-200)] flex-shrink-0"
                     title="Start Focus Timer"
                   >
                     <Play size={20} fill="currentColor" className="ml-0.5" />

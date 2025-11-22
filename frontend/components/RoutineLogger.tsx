@@ -71,7 +71,7 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
                   type="button"
                   onClick={() => setLogData({ ...logData, moodRating: option.value })}
                   className={`flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 rounded-2xl border transition-all duration-200 active:scale-95 hover:shadow-md ${logData.moodRating === option.value
-                    ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 border-[var(--primary-500)] shadow-md scale-105'
+                    ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 dark:text-[var(--primary-500)] border-[var(--primary-500)] shadow-md scale-105'
                     : 'bg-white dark:bg-slate-700 border-slate-100 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 hover:scale-105'
                     }`}
                 >

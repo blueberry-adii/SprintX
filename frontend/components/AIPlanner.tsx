@@ -101,7 +101,7 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
                     {formatDate(item.createdAt)}
                   </span>
                 </div>
-                <div className="text-sm font-medium text-slate-700 dark:text-slate-200 line-clamp-2">
+                <div className="text-sm font-medium text-slate-700 dark:text-slate-600 line-clamp-2">
                   {item.insights[0]}
                 </div>
                 <div className="mt-2 flex items-center gap-2">

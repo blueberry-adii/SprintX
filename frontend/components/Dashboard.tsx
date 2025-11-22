@@ -139,7 +139,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, sta
             return (
               <div key={idx} className={`flex flex-col items-center gap-1 sm:gap-2 p-1 sm:p-3 rounded-2xl transition-all duration-300 ${isToday ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/20 ring-1 ring-[var(--primary-200)] shadow-sm scale-105' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:scale-105'}`}>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{day.dayName}</span>
-                <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-xs sm:text-sm font-bold transition-all ${day.hasLog ? 'bg-[var(--primary-100)] text-[var(--primary-700)]' : 'text-slate-600 dark:text-slate-400'} ${isToday ? 'bg-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-200)] dark:shadow-none' : ''}`}>
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-xs sm:text-sm font-bold transition-all ${day.hasLog ? 'bg-[var(--primary-600)] text-white' : 'text-slate-600 dark:text-slate-400'} ${isToday ? 'bg-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-200)] dark:shadow-none' : ''}`}>
                   {day.dateDisplay}
                 </div>
                 <div className={`w-1.5 h-1.5 rounded-full ${day.hasLog ? 'bg-[var(--primary-400)]' : 'bg-transparent'}`}></div>

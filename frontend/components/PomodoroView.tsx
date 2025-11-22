@@ -310,7 +310,7 @@ export const PomodoroView: React.FC<PomodoroViewProps> = ({ tasks, initialTask, 
                             }`}
                         >
                             <div>
-                                <div className={`font-bold text-sm ${selectedTaskId === task.id ? 'text-[var(--primary-900)] dark:text-[var(--primary-100)]' : 'text-slate-700 dark:text-slate-200'}`}>
+                                <div className={`font-bold text-sm ${selectedTaskId === task.id ? 'text-[var(--primary-900)] dark:text-black' : 'text-slate-700 dark:text-white'}`}>
                                     {task.title}
                                 </div>
                                 <div className="text-xs text-slate-400 mt-1 font-medium">{task.category}</div>
