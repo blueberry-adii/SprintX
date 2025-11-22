@@ -20,9 +20,7 @@ services:
       FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
       FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
       FIREBASE_CLIENT_ID: ${FIREBASE_CLIENT_ID}
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
+
     depends_on:
       - mysql
     networks:
