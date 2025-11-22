@@ -20,9 +20,12 @@ const PORT = 5000;
 
 app.use(
   cors({
-    origin: "*",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      return callback(null, true);
+    },
     credentials: true,
-    preflightContinue: true,
+    preflightContinue: false,
     optionsSuccessStatus: 204,
   })
 );
