@@ -19,7 +19,5 @@ tmp_table_size = 16M
 max_heap_table_size = 16M
 
 performance_schema = OFF
-query_cache_type = 0
-query_cache_size = 0
 
 skip-log-bin
