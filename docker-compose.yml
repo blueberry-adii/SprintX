@@ -7,11 +7,21 @@ services:
     restart: always
     ports:
       - "5000:5000"
-    # environment:
-    #   MONGO_URI: mongodb://mongo:27017/hackathon
-    #   NODE_ENV: production
-    # depends_on:
-    #   - mongo
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      FIREBASE_TYPE: ${FIREBASE_TYPE}
+      FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
+      FIREBASE_PRIVATE_KEY_ID: ${FIREBASE_PRIVATE_KEY_ID}
+      FIREBASE_PRIVATE_KEY: ${FIREBASE_PRIVATE_KEY}
+      FIREBASE_CLIENT_EMAIL: ${FIREBASE_CLIENT_EMAIL}
+      FIREBASE_CLIENT_ID: ${FIREBASE_CLIENT_ID}
+    depends_on:
+      - mysql
     networks:
       - hackathon-net
 
@@ -26,20 +36,24 @@ services:
     depends_on:
       - backend
 
-  # mongo:
-  #   image: mongo:6
-  #   container_name: mongo
-  #   restart: always
-  #   ports:
-  #     - "27017:27017"
-  #   volumes:
-  #     - mongo_data:/data/db
-  #   networks:
-  #     - hackathon-net
-
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: pass
+      MYSQL_DATABASE: sprintx
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - hackathon-net
 
 networks:
   hackathon-net:
 
-# volumes:
-#   mongo_data:
+volumes:
+  mysql_data:

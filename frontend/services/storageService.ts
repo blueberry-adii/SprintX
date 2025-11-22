@@ -1,123 +1,364 @@
-import { Task, RoutineLog, UserProfile, Priority, Category } from '../types';
+import { Task, RoutineLog, UserProfile, Priority, Category, DashboardStats } from '../types';
+import { api } from './api';
 
-const TASKS_KEY = 'studentflow_tasks';
-const LOGS_KEY = 'studentflow_logs';
-const PROFILE_KEY = 'studentflow_profile';
+const TASKS_KEY = 'studentflow_tasks_v3';
+const LOGS_KEY = 'studentflow_logs_v3';
+const PROFILE_KEY = 'studentflow_profile_v3';
 
-// Initial Mock Data
-const initialTasks: Task[] = [
-  {
-    id: '1',
-    title: 'Calculus Midterm Prep',
-    durationMinutes: 120,
-    deadline: new Date(Date.now() + 86400000 * 2).toISOString(),
-    priority: Priority.URGENT,
-    category: Category.STUDY,
-    completed: false
-  },
-  {
-    id: '2',
-    title: 'Gym Session',
-    durationMinutes: 60,
-    deadline: new Date(Date.now() + 86400000).toISOString(),
-    priority: Priority.MEDIUM,
-    category: Category.HEALTH,
-    completed: true
-  },
-  {
-    id: '3',
-    title: 'History Essay Draft',
-    durationMinutes: 90,
-    deadline: new Date(Date.now() + 86400000 * 5).toISOString(),
-    priority: Priority.HIGH,
-    category: Category.STUDY,
-    completed: false
+// Cache duration in milliseconds (e.g., 5 minutes)
+const CACHE_DURATION = 5 * 60 * 1000;
+
+interface CacheItem<T> {
+  data: T;
+  timestamp: number;
+}
+
+// Helper to get data from cache or return null if expired/missing
+const getFromCache = <T>(key: string): T | null => {
+  const cached = localStorage.getItem(key);
+  if (!cached) return null;
+
+  try {
+    const parsed: CacheItem<T> = JSON.parse(cached);
+    const now = Date.now();
+    if (now - parsed.timestamp < CACHE_DURATION) {
+      return parsed.data;
+    }
+  } catch (e) {
+    console.error('Error parsing cache:', e);
   }
-];
-
-// Generated 30 days of mock data for calendar scrolling
-const initialLogs: RoutineLog[] = Array.from({ length: 30 }).map((_, i) => ({
-  id: `log-${i}`,
-  date: new Date(Date.now() - i * 86400000).toISOString().split('T')[0],
-  wakeUpTime: '07:00',
-  sleepTime: '23:00',
-  studyHours: Math.max(0, 4 + (Math.random() * 4 - 2)), // Random between 2 and 6
-  screenTimeHours: Math.max(0, 3 + (Math.random() * 3 - 1.5)), // Random between 1.5 and 4.5
-  exerciseMinutes: i % 2 === 0 ? 45 : 0,
-  moodRating: Math.min(10, Math.max(1, 6 + Math.floor(Math.random() * 4 - 2)))
-})).reverse();
-
-const initialProfile: UserProfile = {
-  name: 'Alex Student',
-  goals: ['Achieve A in Math', 'Sleep 8 hours daily', 'Complete 2 coding projects'],
-  examDates: [
-    { subject: 'Calculus', date: '2024-06-15' },
-    { subject: 'Physics', date: '2024-06-20' }
-  ]
+  return null;
 };
 
-// Helper to simulate network delay for realistic feel
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+// Helper to save data to cache
+const saveToCache = <T>(key: string, data: T) => {
+  const item: CacheItem<T> = {
+    data,
+    timestamp: Date.now()
+  };
+  localStorage.setItem(key, JSON.stringify(item));
+};
+
+// Helper to map backend task to frontend task
+const mapTask = (data: any): Task => ({
+  id: data.id,
+  title: data.title,
+  deadline: data.deadline,
+  durationMinutes: data.duration_mins || 0,
+  priority: data.priority,
+  category: data.category,
+  completed: data.status === 'Completed'
+});
+
+// Theme Mapping
+const themeMap: Record<string, string> = {
+  'teal': 'Ocean',
+  'violet': 'Royal',
+  'blue': 'Sky',
+  'orange': 'Sunset'
+};
+
+const reverseThemeMap: Record<string, string> = {
+  'Ocean': 'teal',
+  'Royal': 'violet',
+  'Sky': 'blue',
+  'Sunset': 'orange'
+};
 
 export const storageService = {
   getTasks: async (): Promise<Task[]> => {
-    await delay(300);
-    const data = localStorage.getItem(TASKS_KEY);
-    return data ? JSON.parse(data) : initialTasks;
+    // Try cache first
+    const cachedTasks = getFromCache<Task[]>(TASKS_KEY);
+    if (cachedTasks && Array.isArray(cachedTasks)) {
+      return cachedTasks;
+    }
+
+    // Fetch from API
+    try {
+      const response = await api.get('/tasks');
+      // Backend returns { msg: "...", tasks: [...] }
+      const tasksData = response.tasks || response.data;
+
+      if (!Array.isArray(tasksData)) {
+        console.error("Invalid tasks format received from API", response);
+        return [];
+      }
+      const tasks = tasksData.map(mapTask);
+      saveToCache(TASKS_KEY, tasks);
+      return tasks;
+    } catch (error) {
+      console.error('Failed to fetch tasks:', error);
+      throw error;
+    }
   },
 
   saveTask: async (task: Task): Promise<Task> => {
-    await delay(200);
-    const tasks = await storageService.getTasks();
-    // Handle both new creation and updates if passed differently, 
-    // though saveTask usually implies creation in this context.
-    // We ensure an ID exists.
-    const newTask = { ...task, id: task.id || Date.now().toString() };
-    const updatedTasks = [...tasks, newTask];
-    localStorage.setItem(TASKS_KEY, JSON.stringify(updatedTasks));
-    return newTask;
+    try {
+      // Map frontend task to backend format for sending
+      const backendTask = {
+        title: task.title,
+        deadline: task.deadline,
+        duration_mins: task.durationMinutes,
+        priority: task.priority,
+        category: task.category,
+        status: task.completed ? 'Completed' : 'Pending'
+      };
+
+      const response = await api.post('/tasks', backendTask);
+      const savedTask = mapTask(response.data);
+
+      // Update cache
+      const currentTasks = getFromCache<Task[]>(TASKS_KEY) || [];
+      const updatedTasks = [...currentTasks, savedTask];
+      saveToCache(TASKS_KEY, updatedTasks);
+
+      return savedTask;
+    } catch (error) {
+      console.error('Failed to save task:', error);
+      throw error;
+    }
   },
 
   updateTask: async (task: Task): Promise<Task> => {
-    await delay(200);
-    const tasks = await storageService.getTasks();
-    const updatedTasks = tasks.map(t => t.id === task.id ? task : t);
-    localStorage.setItem(TASKS_KEY, JSON.stringify(updatedTasks));
-    return task;
+    try {
+      const backendTask = {
+        title: task.title,
+        deadline: task.deadline,
+        duration_mins: task.durationMinutes,
+        priority: task.priority,
+        category: task.category,
+        status: task.completed ? 'Completed' : 'Pending'
+      };
+
+      const response = await api.put(`/tasks/${task.id}`, backendTask);
+      const updatedTask = mapTask(response.data);
+
+      // Update cache
+      const currentTasks = getFromCache<Task[]>(TASKS_KEY) || [];
+      const newTasks = currentTasks.map(t => t.id === task.id ? updatedTask : t);
+      saveToCache(TASKS_KEY, newTasks);
+
+      return updatedTask;
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      throw error;
+    }
+  },
+
+  toggleTask: async (id: string, isCompleted: boolean): Promise<Task> => {
+    try {
+      const endpoint = isCompleted ? `/tasks/${id}/complete` : `/tasks/${id}/uncomplete`;
+      const response = await api.patch(endpoint, {});
+      const updatedTask = mapTask(response.data);
+
+      // Update cache
+      const currentTasks = getFromCache<Task[]>(TASKS_KEY) || [];
+      const newTasks = currentTasks.map(t => t.id === id ? updatedTask : t);
+      saveToCache(TASKS_KEY, newTasks);
+
+      return updatedTask;
+    } catch (error) {
+      console.error('Failed to toggle task:', error);
+      throw error;
+    }
   },
 
   deleteTask: async (id: string): Promise<void> => {
-    await delay(200);
-    const tasks = await storageService.getTasks();
-    const updatedTasks = tasks.filter(t => t.id !== id);
-    localStorage.setItem(TASKS_KEY, JSON.stringify(updatedTasks));
+    try {
+      await api.delete(`/tasks/${id}`);
+
+      // Update cache
+      const currentTasks = getFromCache<Task[]>(TASKS_KEY) || [];
+      const newTasks = currentTasks.filter(t => t.id !== id);
+      saveToCache(TASKS_KEY, newTasks);
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      throw error;
+    }
   },
 
   getLogs: async (): Promise<RoutineLog[]> => {
-    await delay(300);
-    const data = localStorage.getItem(LOGS_KEY);
-    return data ? JSON.parse(data) : initialLogs;
+    const cachedLogs = getFromCache<RoutineLog[]>(LOGS_KEY);
+    if (cachedLogs && Array.isArray(cachedLogs)) {
+      return cachedLogs;
+    }
+
+    try {
+      const response = await api.get('/routines/latest');
+      const logsData = response.data;
+
+      if (!Array.isArray(logsData)) {
+        console.error("Invalid logs format received from API", logsData);
+        return [];
+      }
+
+      const moodMapReverse: Record<string, number> = {
+        'Terrible': 2,
+        'Bad': 4,
+        'Okay': 6,
+        'Good': 8,
+        'Great': 10
+      };
+
+      const logs: RoutineLog[] = logsData.map((log: any) => ({
+        id: log.id?.toString() || '',
+        date: log.log_date,
+        wakeUpTime: log.wake_up_time,
+        sleepTime: log.sleep_time,
+        studyHours: Number(log.study_hours) || 0,
+        screenTimeHours: Number(log.screen_hours) || 0,
+        exerciseMinutes: Number(log.exercise_mins) || 0,
+        moodRating: typeof log.felt_today === 'string' ? (moodMapReverse[log.felt_today] || 6) : (log.felt_today || 6)
+      }));
+
+      saveToCache(LOGS_KEY, logs);
+      return logs;
+    } catch (error) {
+      console.error('Failed to fetch logs:', error);
+      throw error;
+    }
   },
 
   saveLog: async (log: RoutineLog): Promise<RoutineLog> => {
-    await delay(200);
-    const logs = await storageService.getLogs();
-    const newLog = { ...log, id: log.id || Date.now().toString() };
-    // Prepend to list
-    const updatedLogs = [newLog, ...logs];
-    localStorage.setItem(LOGS_KEY, JSON.stringify(updatedLogs));
-    return newLog;
+    try {
+      const moodMap: Record<number, string> = {
+        2: 'Terrible',
+        4: 'Bad',
+        6: 'Okay',
+        8: 'Good',
+        10: 'Great'
+      };
+
+      const backendLog = {
+        log_date: log.date,
+        felt_today: moodMap[log.moodRating] || 'Okay',
+        study_hours: log.studyHours,
+        screen_hours: log.screenTimeHours,
+        exercise_mins: log.exerciseMinutes,
+        wake_up_time: log.wakeUpTime,
+        sleep_time: log.sleepTime
+      };
+
+      const response = await api.post('/routines', backendLog);
+      const savedLog = { ...log };
+
+      // Update cache - prepend new log
+      const currentLogs = getFromCache<RoutineLog[]>(LOGS_KEY) || [];
+      const filteredLogs = currentLogs.filter(l => l.date !== log.date);
+      const updatedLogs = [savedLog, ...filteredLogs];
+      saveToCache(LOGS_KEY, updatedLogs);
+
+      return savedLog;
+    } catch (error) {
+      console.error('Failed to save log:', error);
+      throw error;
+    }
   },
 
   getProfile: async (): Promise<UserProfile> => {
-    await delay(300);
-    const data = localStorage.getItem(PROFILE_KEY);
-    return data ? JSON.parse(data) : initialProfile;
+    const cachedProfile = getFromCache<UserProfile>(PROFILE_KEY);
+    if (cachedProfile) {
+      return cachedProfile;
+    }
+
+    try {
+      const response = await api.get('/auth/me');
+      const data = response.data;
+      // Map backend snake_case to frontend camelCase
+      const profile: UserProfile = {
+        name: data.full_name || data.name || 'Student',
+        email: data.email,
+        // Load PFP from local storage as requested (frontend-only persistence)
+        profilePicture: localStorage.getItem('studentflow_user_pfp') || data.pfp_url || '',
+        goals: typeof data.academic_goals === 'string' ? JSON.parse(data.academic_goals) : (data.academic_goals || []),
+        examDates: typeof data.upcoming_exams === 'string' ? JSON.parse(data.upcoming_exams) : (data.upcoming_exams || []),
+        settings: {
+          darkMode: data.settings_dark_mode === 1,
+          theme: reverseThemeMap[data.settings_color_theme] || 'teal'
+        }
+      };
+
+      saveToCache(PROFILE_KEY, profile);
+      return profile;
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      throw error;
+    }
   },
 
   saveProfile: async (profile: UserProfile): Promise<UserProfile> => {
-    await delay(200);
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    return profile;
+    try {
+      // Save PFP to local storage
+      if (profile.profilePicture) {
+        localStorage.setItem('studentflow_user_pfp', profile.profilePicture);
+      }
+
+      // Map frontend camelCase to backend snake_case
+      const backendProfile = {
+        full_name: profile.name,
+        academic_goals: profile.goals,
+        upcoming_exams: profile.examDates,
+        pfp_url: profile.profilePicture // Still sending to backend for sync if possible, but local takes precedence
+        // settings are handled via separate endpoints
+      };
+
+      await api.put('/auth/profile', backendProfile);
+
+      // Update cache
+      const updatedProfile = { ...profile };
+      saveToCache(PROFILE_KEY, updatedProfile);
+      return updatedProfile;
+    } catch (error) {
+      console.error('Failed to save profile:', error);
+      throw error;
+    }
+  },
+
+  toggleDarkMode: async (): Promise<boolean> => {
+    try {
+      const res = await api.patch('/settings/dark-mode', {});
+      const isDark = res.data.dark_mode;
+
+      // Update cache
+      const profile = getFromCache<UserProfile>(PROFILE_KEY);
+      if (profile && profile.settings) {
+        profile.settings.darkMode = isDark;
+        saveToCache(PROFILE_KEY, profile);
+      }
+
+      return isDark;
+    } catch (error) {
+      console.error('Failed to toggle dark mode:', error);
+      throw error;
+    }
+  },
+
+  changeTheme: async (theme: string): Promise<string> => {
+    try {
+      const backendTheme = themeMap[theme] || 'Ocean';
+      const res = await api.patch('/settings/theme', { theme: backendTheme });
+
+      // Update cache
+      const profile = getFromCache<UserProfile>(PROFILE_KEY);
+      if (profile && profile.settings) {
+        profile.settings.theme = theme;
+        saveToCache(PROFILE_KEY, profile);
+      }
+
+      return theme;
+    } catch (error) {
+      console.error('Failed to change theme:', error);
+      throw error;
+    }
+  },
+
+  getDashboardStats: async (): Promise<DashboardStats> => {
+    try {
+      const response = await api.get('/dashboard');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
+      throw error;
+    }
   }
 };

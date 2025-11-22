@@ -4,7 +4,7 @@
 
 ---
 
-##  1. Smoke Test (Basic Load Test)
+## 1. Smoke Test (Basic Load Test)
 
 |                Test Item                      | Result | Notes                    |
 |-----------------------------------------------|--------|--------------------------|
@@ -15,7 +15,7 @@
 
 ---
 
-##  2. Navigation Test
+## 2. Navigation Test
 
 All major pages load without crashes or errors.
 
@@ -28,9 +28,9 @@ All major pages load without crashes or errors.
 
 ---
 
-##  3. Task Manager – Functional Testing
+## 3. Task Manager – Functional Testing
 
-###  Add Task
+### ✔ Add Task
 **Steps:**
 1. Open Task Manager  
 2. Enter task **“Study Math”**  
@@ -44,7 +44,7 @@ All major pages load without crashes or errors.
 
 ---
 
-###  Mark Complete
+### ✔ Mark Complete
 - Clicking the completion icon updates task state  
 - Color/status changes visibly  
 **Status:** ✔ PASS  
@@ -52,7 +52,7 @@ All major pages load without crashes or errors.
 
 ---
 
-###  Persistence After Refresh
+### ✔ Persistence After Refresh
 - Reloaded the page  
 - Task remained in the list (localStorage working)  
 **Status:** ✔ PASS  
@@ -60,14 +60,14 @@ All major pages load without crashes or errors.
 
 ---
 
-###  Delete Task
+### ✔ Delete Task
 - Delete button removed task from UI  
 - Removed from localStorage as well  
 **Status:** ✔ PASS  
 
 ---
 
-##  4. Focus Timer Testing
+## 4. Focus Timer Testing
 
 | Feature          | Status  | Notes                     |
 |------------------|---------|---------------------------|
@@ -80,27 +80,27 @@ All major pages load without crashes or errors.
 
 ---
 
-##  5. Routine Logger Testing
+## 5. Routine Logger Testing
 
-###  Add Routine
+### ✔ Add Routine
 Routine entry added successfully  
 **Status:** ✔ PASS  
 *Proof:* `routine_add.png`
 
-###  Persistence After Refresh
+### ✔ Persistence After Refresh
 Routine remains after page reload  
 **Status:** ✔ PASS  
 *Proof:* `routine_persist.png`
 
-###  Validation
+### ✔ Validation
 Empty routine submission handling  
 **Status:** PASS / FAIL *(to be marked)*  
 
 ---
 
-##  6. AI Planner Testing
+## 6. AI Planner Testing
 
-###  Valid Prompt
+### ✔ Valid Prompt
 Prompt: *“Create a 2-hour study plan for maths.”*  
 AI generated a study plan successfully  
 **Status:** ✔ PASS  
@@ -108,14 +108,14 @@ AI generated a study plan successfully
 
 ---
 
-###  Empty Prompt Validation  
+### ✔ Empty Prompt Validation  
 **Expected:** Should show error notification  
 **Actual:** PASS / FAIL *(to be marked)*  
 *Proof:* `ai_empty.png`
 
 ---
 
-###  Offline / Network Failure Handling
+### ✔ Offline / Network Failure Handling
 - Turned WiFi off  
 - Clicked **Generate**  
 **Expected:** Error message displayed  
@@ -124,12 +124,12 @@ AI generated a study plan successfully
 
 ---
 
-##  7. Settings Page (Placeholder)
+## 7. Settings Page (Placeholder)
 (To be filled after teammate completes UI)
 
 ---
 
-#  Final Summary
+# Final Summary
 
 | Category       | Result  |
 |----------------|---------|
@@ -142,7 +142,6 @@ AI generated a study plan successfully
 
 ---
 
-#  Overall Result  
+# Overall Result  
 The application is **stable, functional, and passes all critical front-end tests**.  
-
 

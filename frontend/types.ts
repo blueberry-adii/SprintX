@@ -43,16 +43,28 @@ export interface UserProfile {
   profilePicture?: string; // Base64 string or URL
   goals: string[];
   examDates: { subject: string; date: string }[];
-}
-
-export interface AISuggestion {
-  type: 'alert' | 'schedule' | 'insight';
-  message: string;
-  actionable?: boolean;
+  settings?: {
+    darkMode: boolean;
+    theme: string;
+  };
 }
 
 export interface AIAnalysisResult {
+  id?: string;
+  createdAt?: string;
   insights: string[];
   suggestedSchedule: { time: string; activity: string; note?: string }[];
   productivityScore: number;
+}
+
+export interface DashboardStats {
+  first_name: string;
+  total_tasks: number;
+  completed_tasks: number;
+  avg_study_hours: number;
+  productivity_score: number;
+  productivity_change: number;
+  study_past_7_days: { date: string; study_hours: number }[];
+  screen_past_7_days: { date: string; screen_hours: number }[];
+  wellbeing_past_7_days: { date: string; wellbeing_score: number }[];
 }
