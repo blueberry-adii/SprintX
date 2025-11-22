@@ -2,7 +2,8 @@
 
 StudentFlow is a comprehensive student productivity application designed to help students manage tasks, track daily routines, and gain insights into their study habits. It features a modern, responsive UI and a robust backend API.
 
-[Click here (Hosted on AWS EC2 t3.small)](http://)
+- [Click here (Hosted on AWS EC2 t3.small)](http://)
+- [Demo Video](https://drive.google.com/drive/folders/1hklEpm23_jBYWJU8FBpL48gk7i3Dueur?usp=sharing)
 
 ![StudentFlow Dashboard](./docs/ss/dashboard_screenshot.png)
 
@@ -43,6 +44,7 @@ docker-compose -f docker-compose.dev.yml up --build
 - **ORM/Driver**: mysql2
 - **Auth**: Firebase Admin SDK (Token Verification)
 - **AI**: Google Generative AI (Gemini)
+- **Testing**: Postman, ThunderClient
 
 ### DevOps
 
@@ -117,9 +119,14 @@ SprintX/
 
 # Contributors
 
-AIML-3 3rd Sem BMSIT
+AIML-3, 3rd Sem BMSIT
 
-- Aditya Prasad
-- Mithare Aditya
-- Nyasha Chauhan
-- Nabiha Fathima
+- Aditya Prasad -> (Team Lead, Fullstack Engineer, Basic DevOps, Team Coordinator and Debugger)
+  [LinkedIn](https://www.linkedin.com/in/aditya-prasad-095ab9329/)
+
+- Mithare Aditya -> (Frontend Engineer, Prompt Engineer, Debugger)
+  [LinkedIn](https://www.linkedin.com/in/aditya-mithare-52356a333/)
+- Nyasha Chauhan -> (UI Testing, API Testing, Server Testing, Unit testing, Docs manager)
+  [LinkedIn](https://www.linkedin.com/in/nyasha-chauhan-2a6935357/)
+- Nabiha Fathima -> (Frontend Engineer)
+  [LinkedIn](https://www.linkedin.com/in/nabiha-fathima-s-8b4670357/)
