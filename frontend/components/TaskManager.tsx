@@ -141,7 +141,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
           <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-6">
             {editingTaskId ? 'Edit Task' : 'Create New Task'}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 gap-6">
             <div className="col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Task Name</label>
               <input
@@ -153,7 +153,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                 onChange={e => setFormData({ ...formData, title: e.target.value })}
               />
             </div>
-            <div>
+            <div className="max-[650px]:col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Deadline</label>
               <input
                 type="datetime-local"
@@ -163,7 +163,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                 onChange={e => setFormData({ ...formData, deadline: e.target.value })}
               />
             </div>
-            <div>
+            <div className="max-[650px]:col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Duration (mins)</label>
               <input
                 type="number"
@@ -173,7 +173,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                 onChange={e => setFormData({ ...formData, durationMinutes: parseInt(e.target.value) })}
               />
             </div>
-            <div>
+            <div className="max-[650px]:col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Priority</label>
               <select
                 className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
@@ -183,7 +183,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
                 {Object.values(Priority).map(p => <option key={p} value={p}>{p}</option>)}
               </select>
             </div>
-            <div>
+            <div className="max-[650px]:col-span-2">
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Category</label>
               <select
                 className="w-full px-4 py-3 border border-slate-200 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-[var(--primary-500)] outline-none bg-slate-50 dark:bg-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-900"
@@ -209,7 +209,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
             key={t}
             onClick={() => setFilter(t as any)}
             className={`px-4 py-2 text-sm font-medium capitalize rounded-lg transition-all active:scale-95 ${filter === t
-              ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20'
+              ? 'text-[var(--primary-700)] dark:text-[var(--primary-700)] bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20'
               : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
           >

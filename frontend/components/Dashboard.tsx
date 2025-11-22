@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { RoutineLog, Task, DashboardStats } from '../types';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -22,6 +22,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, sta
     monday.setHours(0, 0, 0, 0);
     return monday;
   });
+
+  const isMobile = useIsMobile();
 
   const handlePrevWeek = () => {
     const newDate = new Date(currentWeekStart);
@@ -167,7 +169,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, sta
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
           <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/10 text-[var(--primary-600)] dark:text-[var(--primary-300)] rounded-xl group-hover:scale-110 transition-transform duration-300">
+            <div className="p-3 bg-[var(--primary-50)] text-[var(--primary-700)] rounded-xl group-hover:scale-110 transition-transform duration-300">
               <Clock size={24} />
             </div>
             <h3 className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wide">Avg. Study</h3>
@@ -212,7 +214,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, sta
           </div>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData} barGap={8}>
+              <BarChart data={weeklyData} barGap={8} margin={{ top: 10, right: 0, left: isMobile? -35 : 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--primary-100)" strokeOpacity={0.2} />
                 <XAxis dataKey="dayName" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} dy={10} />
                 <YAxis
@@ -238,7 +240,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, sta
           <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-8">Wellbeing Trend</h3>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={weeklyData}>
+              <AreaChart data={weeklyData}
+                margin={{ top: 10, right: 0, left: isMobile? -35 : 0, bottom: 0 }}
+              >
                 <defs>
                   <linearGradient id="colorMood" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.2} />
@@ -246,7 +250,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, sta
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--primary-100)" strokeOpacity={0.2} />
-                <XAxis dataKey="dayName" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} dy={10} />
+                <XAxis dataKey="dayName" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} dy={10} padding={{ left: 0, right: 0 }} />
                 <YAxis tick={{ fontSize: 12, fill: '#94a3b8' }} domain={[0, 10]} axisLine={false} tickLine={false} />
                 <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
                 <Area
@@ -267,3 +271,16 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, sta
     </div>
   );
 };
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 475);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  return isMobile;
+}

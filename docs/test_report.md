@@ -1,6 +1,6 @@
 # 🌟 **StudentFlow – Student Productivity Tracker**  
 ### **Comprehensive Quality Assurance Test Report**  
-**Tester:** Nyasha Chauhan
+**Tester:** Nyasha Chauhan  
 **Date:** 21-11-2025  
 
 ---
@@ -97,8 +97,8 @@ Dashboard charts and widgets rendered correctly with no lag.
 
 ![AI Insights Page](./ss/ai_insights_page.png)
 
-### ✔ **Valid Prompt Response**
-Prompt: *“Create a 2-hour study plan for maths.”*  
+### ✔ **Valid Prompt Response**  
+Prompt: *“Create a 2-hour study plan for maths.”*
 
 ![AI Valid](./ss/ai_valid.png)
 
@@ -107,32 +107,27 @@ Prompt: *“Create a 2-hour study plan for maths.”*
 ![AI Insights](./ss/ai_insights.png)
 
 **Status:** ✔ PASS  
-AI module responds correctly with meaningful content.
 
 ---
 
 # 7️⃣ **Profile Page Testing**
 
 ### ✔ Profile Page  
-
 ![Profile](./ss/profile.png)
 
 ### ✔ Edit Profile Section  
-
 ![Profile Edit](./ss/profile_edit.png)
 
-**Status:** ✔ PASS
+**Status:** ✔ PASS  
 
 ---
 
 # 8️⃣ **Settings Page Testing**
 
 ### ✔ Settings Page Overview  
-
 ![Settings](./ss/settings.png)
 
 ### ✔ Settings Toggles  
-
 ![Settings Toggle](./ss/settings_toggle.png)
 
 **Status:** ✔ PASS  
@@ -164,4 +159,3 @@ AI module responds correctly with meaningful content.
 
 # ✅ **OVERALL CONCLUSION**
 StudentFlow is a **stable, fully functional, visually consistent** productivity platform ready for deployment and demonstration.
-

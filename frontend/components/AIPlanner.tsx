@@ -93,7 +93,7 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
                   if (window.innerWidth < 1024) setShowSidebar(false);
                 }}
                 className={`w-full text-left p-4 rounded-2xl transition-all border ${selectedInsight === item
-                  ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 border-[var(--primary-200)] dark:border-[var(--primary-700)] shadow-sm'
+                  ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 border-[var(--primary-200)] dark:border-[var(--primary-700)] shadow-sm dark:text-slate-500'
                   : 'bg-slate-50 dark:bg-slate-700/30 border-transparent hover:bg-slate-100 dark:hover:bg-slate-700'}`}
               >
                 <div className="flex justify-between items-start mb-1">

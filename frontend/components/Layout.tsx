@@ -88,7 +88,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentTab, setTab }) 
                   setMobileMenuOpen(false);
                 }}
                 className={`w-full flex items-center ${isCollapsed && !mobileMenuOpen ? 'justify-center' : 'justify-start'} px-4 py-3.5 rounded-xl transition-all duration-200 group relative active:scale-95 ${active
-                  ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/20 text-[var(--primary-700)] dark:text-[var(--primary-200)] font-semibold shadow-sm'
+                  ? 'bg-[var(--primary-50)] text-[var(--primary-700)] font-semibold shadow-sm'
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 title={isCollapsed ? item.label : ''}
