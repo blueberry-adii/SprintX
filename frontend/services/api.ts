@@ -1,4 +1,4 @@
-const API_BASE = "http://18.60.185.245:5000/api/v1";
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1";
 
 export const getAuthHeaders = () => {
   const token = localStorage.getItem("token");

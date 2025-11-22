@@ -28,22 +28,33 @@ FIREBASE_CLIENT_ID=your-client-id
 
 # Google Gemini (AI)
 GEMINI_API_KEY=your-gemini-api-key
+
+# Frontend Config
+VITE_API_URL=http://localhost:5000/api/v1
 ```
 
 > **Note**: If running the backend locally (outside Docker) but keeping the DB in Docker, change `DB_HOST` to `localhost` and ensure the port mapping in `docker-compose.yml` matches (e.g., `3307:3306` means use port `3307`).
 
 ## Installation & Running
 
-### Option 1: Docker Compose (Recommended)
-This will start the Database, Backend, and Frontend in containers.
+
+### Option 1: Docker Compose (Production-like)
+This will start the Database, Backend, and Frontend in containers using the production build for frontend (Nginx).
 
 ```bash
 docker-compose up --build
 ```
+
+### Option 2: Docker Compose (Development Mode)
+This enables **hot-reloading** for both frontend and backend. Changes to your code will instantly reflect in the app.
+
+```bash
+docker-compose -f docker-compose.dev.yml up --build
+```
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:5000`
 
-### Option 2: Manual Setup
+### Option 3: Manual Setup
 
 #### 1. Database
 Start the MySQL container:
