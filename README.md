@@ -4,6 +4,8 @@ StudentFlow is a comprehensive student productivity application designed to help
 
 [Click here (Hosted on AWS EC2 t3.small)](http://)
 
+![StudentFlow Dashboard](./docs/ss/dashboard_screenshot.png)
+
 ## Local Setup
 
 To Try it on your local machine, refer this
