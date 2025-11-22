@@ -44,14 +44,13 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName }) =
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
       const foundLog = logs.find(l => {
-        // Handle potential date format differences
-        const logDate = l.date.split('T')[0];
-        console.log(`Comparing Log: ${logDate} with Column: ${dateStr}`);
+        // Parse log date as local time to handle timezone offsets correctly
+        const logD = new Date(l.date);
+        const logDate = `${logD.getFullYear()}-${String(logD.getMonth() + 1).padStart(2, '0')}-${String(logD.getDate()).padStart(2, '0')}`;
+
+        // console.log(`Comparing Log: ${logDate} with Column: ${dateStr}`);
         return logDate === dateStr;
       });
-
-      // Debug log to trace date matching
-      console.log(`Dashboard: Checking date ${dateStr}. Found log:`, foundLog);
 
       days.push({
         fullDate: d,

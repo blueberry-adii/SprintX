@@ -76,9 +76,11 @@ export const storageService = {
     // Fetch from API
     try {
       const response = await api.get('/tasks');
-      const tasksData = response.data;
+      // Backend returns { msg: "...", tasks: [...] }
+      const tasksData = response.tasks || response.data;
+
       if (!Array.isArray(tasksData)) {
-        console.error("Invalid tasks format received from API", tasksData);
+        console.error("Invalid tasks format received from API", response);
         return [];
       }
       const tasks = tasksData.map(mapTask);
