@@ -3,7 +3,7 @@ version: "3.9"
 services:
   backend:
     build: ./backend
-    container_name: backend-dev
+    container_name: backend
     restart: always
     ports:
       - "5000:5000"
@@ -23,25 +23,20 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-    command: npm run dev
     depends_on:
       - mysql
     networks:
       - hackathon-net
 
   frontend:
-    image: node:18-alpine
-    working_dir: /app
-    container_name: frontend-dev
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    container_name: frontend
     restart: always
     ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=${VITE_API_URL}
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: sh -c "npm install && npm run dev -- --host"
+      - "5173:80"
     networks:
       - hackathon-net
     depends_on:
@@ -49,7 +44,7 @@ services:
 
   mysql:
     image: mysql:8.0
-    container_name: mysql-dev
+    container_name: mysql
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: pass

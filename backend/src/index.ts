@@ -16,19 +16,15 @@ import insightsRouter from "./routes/insights.route.js";
 import settingsRouter from "./routes/settings.route.js";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT: number = Number(process.env.PORT) || 5000;
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      "http://18.60.185.245:5173",
-      "http://frontend:5173",
-    ],
+    origin: ["http://localhost:3000", "http://localhost:5173"],
     credentials: true,
   })
 );
+app.options("*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -51,7 +47,7 @@ const start = async () => {
 
   app.use(errorMiddleware);
 
-  app.listen(PORT, () => {
+  app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on port: ${PORT}`);
   });
 };

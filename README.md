@@ -2,6 +2,15 @@
 
 StudentFlow is a comprehensive student productivity application designed to help students manage tasks, track daily routines, and gain insights into their study habits. It features a modern, responsive UI and a robust backend API.
 
+## Local Setup
+
+To Try it on your local machine, refer this
+[Setup Guide](./docs/setup.md)
+
+```bash
+docker-compose -f docker-compose.dev.yml up --build
+```
+
 ## Features
 
 - **Dashboard**: Visual overview of weekly progress and upcoming tasks.
@@ -15,6 +24,7 @@ StudentFlow is a comprehensive student productivity application designed to help
 ## Tech Stack
 
 ### Frontend
+
 - **Framework**: React.tsx (Vite)
 - **Styling**: TailwindCSS
 - **Icons**: Lucide React
@@ -22,14 +32,16 @@ StudentFlow is a comprehensive student productivity application designed to help
 - **Auth**: Firebase Client SDK
 
 ### Backend
+
 - **Runtime**: Node.js
-- **Framework**: Express.js
+- **Framework**: Express.js (in TypeScript)
 - **Database**: MySQL
 - **ORM/Driver**: mysql2
 - **Auth**: Firebase Admin SDK (Token Verification)
 - **AI**: Google Generative AI (Gemini)
 
 ### DevOps
+
 - **Containerization**: Docker, Docker Compose
 
 ## 📂 Project Structure
@@ -49,18 +61,20 @@ SprintX/
 │   │   ├── services/   # API client services
 │   │   └── ...
 ├── docs/               # Documentation
-└── docker-compose.yml  # Container orchestration
+└── docker-compose.dev.yml  # Container orchestration
 ```
 
 ## Quick Start
 
 ### Prerequisites
+
 - Docker & Docker Compose installed.
 - A `.env` file in the root directory (see `.env.example`).
 
 ### Running with Docker
 
 1.  **Clone the repository**
+
     ```bash
     git clone <repo-url>
     cd SprintX
@@ -68,11 +82,13 @@ SprintX/
 
 2.  **Configure Environment**
     Copy `.env.example` to `.env` and fill in your credentials (MySQL, Firebase, Gemini).
+
     ```bash
     cp .env.example .env
     ```
 
 3.  **Start the Application**
+
     ```bash
     docker-compose up --build
     ```
@@ -81,7 +97,7 @@ SprintX/
     - Frontend: `http://localhost:5173`
     - Backend API: `http://localhost:5000`
 
-## 📚 Documentation
+## Documentation
 
 - [Architecture Overview](./docs/architecture.md)
 - [Setup Guide](./docs/setup.md)

@@ -1,26 +1,29 @@
-# 🌟 **StudentFlow – Student Productivity Tracker**  
-### **Comprehensive Quality Assurance Test Report**  
+# 🌟 **StudentFlow – Student Productivity Tracker**
+
+### **Comprehensive Quality Assurance Test Report**
+
 **Tester:** Nyasha Chauhan  
-**Date:** 21-11-2025  
+**Date:** 21-11-2025
 
 ---
 
-# 🧪 **Quality Summary**
-All major modules were tested for functionality, usability, persistence, error handling, and navigation stability.  
+# **Quality Summary**
+
+All major modules were tested for functionality, usability, persistence, error handling, and navigation stability.
 
 ---
 
-# 1️⃣ **Smoke Test**
+# 1. **Smoke Test**
 
-| Test Case | Expected Outcome | Result | Notes |
-|-----------|------------------|--------|--------|
-| Launch AWS Deployment | App loads without errors | ✔ PASS | No console warnings |
-| Sidebar Rendering | All navigation links appear correctly | ✔ PASS | Smooth transitions |
-| Route Stability | All pages load with no crashes | ✔ PASS | Stable rendering |
+| Test Case             | Expected Outcome                      | Result | Notes               |
+| --------------------- | ------------------------------------- | ------ | ------------------- |
+| Launch AWS Deployment | App loads without errors              | ✔ PASS | No console warnings |
+| Sidebar Rendering     | All navigation links appear correctly | ✔ PASS | Smooth transitions  |
+| Route Stability       | All pages load with no crashes        | ✔ PASS | Stable rendering    |
 
 ---
 
-# 2️⃣ **Dashboard Testing**
+# 2. **Dashboard Testing**
 
 ### **Objective:** Validate analytics, productivity metrics, charts & UI.
 
@@ -31,21 +34,24 @@ Dashboard charts and widgets rendered correctly with no lag.
 
 ---
 
-# 3️⃣ **Task Manager Testing**
+# 3. **Task Manager Testing**
 
 ### ✔ **Add Task**
-- Input: “Study Math”, Priority: High  
-- Task appears immediately  
+
+- Input: “Study Math”, Priority: High
+- Task appears immediately
 
 ![Task Add](./ss/task_add.png)
 
 ### ✔ **Mark Complete**
-- UI state updates visually  
+
+- UI state updates visually
 
 ![Task Complete](./ss/task_complete.png)
 
 ### ✔ **Persistence Check**
-- Task remains after page refresh  
+
+- Task remains after page refresh
 
 ![Task Persistence](./ss/task_persist.png)
 
@@ -57,14 +63,14 @@ Dashboard charts and widgets rendered correctly with no lag.
 
 ---
 
-# 4️⃣ **Focus Timer Testing**
+# 4. **Focus Timer Testing**
 
-| Action | Expected Behavior | Result |
-|--------|--------------------|--------|
+| Action       | Expected Behavior         | Result |
+| ------------ | ------------------------- | ------ |
 | Default Load | Timer shows initial value | ✔ PASS |
-| Start Timer | Countdown begins smoothly | ✔ PASS |
-| Pause Timer | Halts immediately | ✔ PASS |
-| Reset Timer | Resets to base time | ✔ PASS |
+| Start Timer  | Countdown begins smoothly | ✔ PASS |
+| Pause Timer  | Halts immediately         | ✔ PASS |
+| Reset Timer  | Resets to base time       | ✔ PASS |
 
 ![Timer Default](./ss/timer_default.png)  
 ![Timer Running](./ss/timer_running.png)  
@@ -73,17 +79,17 @@ Dashboard charts and widgets rendered correctly with no lag.
 
 ---
 
-# 5️⃣ **Routine Logger Testing**
+# 5. **Routine Logger Testing**
 
-### ✔ Add Routine  
+### ✔ Add Routine
 
 ![Routine Add](./ss/routine_add.png)
 
-### ✔ Persistence After Refresh  
+### ✔ Persistence After Refresh
 
 ![Routine Persist](./ss/routine_persist.png)
 
-### ✔ Routine Logger Overview  
+### ✔ Routine Logger Overview
 
 ![Routine Logger](./ss/routineLogger.png)
 
@@ -91,14 +97,15 @@ Dashboard charts and widgets rendered correctly with no lag.
 
 ---
 
-# 6️⃣ **AI Insights (Smart Planner) Testing**
+# 6. **AI Insights (Smart Planner) Testing**
 
 ### ✔ **AI Insights Page Loaded**
 
 ![AI Insights Page](./ss/ai_insights_page.png)
 
-### ✔ **Valid Prompt Response**  
-Prompt: *“Create a 2-hour study plan for maths.”*
+### ✔ **Valid Prompt Response**
+
+Prompt: _“Create a 2-hour study plan for maths.”_
 
 ![AI Valid](./ss/ai_valid.png)
 
@@ -106,56 +113,61 @@ Prompt: *“Create a 2-hour study plan for maths.”*
 
 ![AI Insights](./ss/ai_insights.png)
 
-**Status:** ✔ PASS  
+**Status:** ✔ PASS
 
 ---
 
-# 7️⃣ **Profile Page Testing**
+# 7. **Profile Page Testing**
 
-### ✔ Profile Page  
+### ✔ Profile Page
+
 ![Profile](./ss/profile.png)
 
-### ✔ Edit Profile Section  
+### ✔ Edit Profile Section
+
 ![Profile Edit](./ss/profile_edit.png)
 
-**Status:** ✔ PASS  
+**Status:** ✔ PASS
 
 ---
 
-# 8️⃣ **Settings Page Testing**
+# 8. **Settings Page Testing**
 
-### ✔ Settings Page Overview  
+### ✔ Settings Page Overview
+
 ![Settings](./ss/settings.png)
 
-### ✔ Settings Toggles  
+### ✔ Settings Toggles
+
 ![Settings Toggle](./ss/settings_toggle.png)
 
-**Status:** ✔ PASS  
+**Status:** ✔ PASS
 
 ---
 
-# 9️⃣ **Logout Testing**
+# 9. **Logout Testing**
 
-| Test | Expected Outcome | Result |
-|------|------------------|--------|
+| Test                 | Expected Outcome              | Result |
+| -------------------- | ----------------------------- | ------ |
 | Logout Functionality | Redirects user & ends session | ✔ PASS |
 
 ---
 
-# 🏆 **FINAL SUMMARY**
+# **FINAL SUMMARY**
 
-| Module | Result |
-|--------|---------|
-| Dashboard | ✔ PASS |
-| Task Manager | ✔ PASS |
-| Focus Timer | ✔ PASS |
+| Module         | Result |
+| -------------- | ------ |
+| Dashboard      | ✔ PASS |
+| Task Manager   | ✔ PASS |
+| Focus Timer    | ✔ PASS |
 | Routine Logger | ✔ PASS |
-| AI Insights | ✔ PASS |
-| Profile | ✔ PASS |
-| Settings | ✔ PASS |
-| Logout | ✔ PASS |
+| AI Insights    | ✔ PASS |
+| Profile        | ✔ PASS |
+| Settings       | ✔ PASS |
+| Logout         | ✔ PASS |
 
 ---
 
-# ✅ **OVERALL CONCLUSION**
+# **OVERALL CONCLUSION**
+
 StudentFlow is a **stable, fully functional, visually consistent** productivity platform ready for deployment and demonstration.
