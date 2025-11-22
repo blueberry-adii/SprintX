@@ -1,0 +1,25 @@
+[mysqld]
+innodb_buffer_pool_size = 128M
+innodb_buffer_pool_instances = 1
+innodb_log_file_size = 32M
+innodb_log_buffer_size = 8M
+
+innodb_flush_log_at_trx_commit = 0
+innodb_flush_method = fsync
+
+max_connections = 30
+thread_cache_size = 16
+table_open_cache = 200
+
+sort_buffer_size = 1M
+read_buffer_size = 1M
+read_rnd_buffer_size = 1M
+join_buffer_size = 1M
+tmp_table_size = 16M
+max_heap_table_size = 16M
+
+performance_schema = OFF
+query_cache_type = 0
+query_cache_size = 0
+
+skip-log-bin

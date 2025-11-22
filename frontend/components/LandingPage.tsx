@@ -17,6 +17,13 @@ import {
 const Nav = ({ onGetStarted, isLoggedIn }: { onGetStarted: () => void, isLoggedIn: boolean }) => {
   const [open, setOpen] = useState(false);
 
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
       <nav className="backdrop-blur-md bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 shadow-sm">
@@ -37,9 +44,9 @@ const Nav = ({ onGetStarted, isLoggedIn }: { onGetStarted: () => void, isLoggedI
           </div>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600 dark:text-slate-300">
-            <button className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors">Features</button>
-            <button className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors">AI Engine</button>
-            <button className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors">Pricing</button>
+            <button onClick={() => scrollToSection('home')} className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors">Home</button>
+            <button onClick={() => scrollToSection('features')} className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors">Features</button>
+            <button onClick={() => scrollToSection('pricing')} className="hover:text-sky-600 dark:hover:text-sky-400 transition-colors">Pricing</button>
 
             <button
               onClick={onGetStarted}
@@ -63,9 +70,9 @@ const Nav = ({ onGetStarted, isLoggedIn }: { onGetStarted: () => void, isLoggedI
         {open && (
           <div className="md:hidden bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-6 py-6 animate-fade-in">
             <div className="flex flex-col gap-4 text-lg font-medium text-slate-600 dark:text-slate-300">
-              <button className="text-left py-2 hover:text-sky-600 transition-colors">Features</button>
-              <button className="text-left py-2 hover:text-sky-600 transition-colors">AI Engine</button>
-              <button className="text-left py-2 hover:text-sky-600 transition-colors">Pricing</button>
+              <button onClick={() => { scrollToSection('features'); setOpen(false); }} className="text-left py-2 hover:text-sky-600 transition-colors">Features</button>
+              <button onClick={() => { scrollToSection('features'); setOpen(false); }} className="text-left py-2 hover:text-sky-600 transition-colors">AI Engine</button>
+              <button onClick={() => { scrollToSection('pricing'); setOpen(false); }} className="text-left py-2 hover:text-sky-600 transition-colors">Pricing</button>
 
               <button
                 onClick={onGetStarted}
@@ -196,7 +203,7 @@ export const LandingPage: React.FC = () => {
       <Nav onGetStarted={handleNavigation} isLoggedIn={isLoggedIn} />
 
       {/* HERO */}
-      <main className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6">
+      <main className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6" id="home">
         {/* Background Gradients */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[800px] overflow-hidden -z-10 pointer-events-none">
           <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-sky-200/40 dark:bg-sky-900/20 blur-[100px] animate-pulse-slow"></div>
@@ -241,19 +248,21 @@ export const LandingPage: React.FC = () => {
               </button>
             </div>
 
-            <div className="mt-16 flex items-center justify-center gap-8 text-slate-400 dark:text-slate-500 grayscale opacity-70">
-              {/* Trust Badges / Logos Placeholder */}
-              <div className="font-bold text-xl">MIT</div>
-              <div className="font-bold text-xl">Stanford</div>
-              <div className="font-bold text-xl">Harvard</div>
-              <div className="font-bold text-xl">Berkeley</div>
+            <div className="flex flex-col mt-12 text-xl text-slate-600 font-bold">
+              <div>Made By:</div>
+              <div className="mt-8 flex items-center justify-center gap-8 text-slate-400 dark:text-slate-500 grayscale opacity-70">
+                <div className="font-bold text-xl">Aditya Prasad</div>
+                <div className="font-bold text-xl">Mithare Aditya</div>
+                <div className="font-bold text-xl">Nyasha</div>
+                <div className="font-bold text-xl">Nabiha</div>
+              </div>
             </div>
           </FadeInSection>
         </div>
       </main>
 
       {/* FEATURES GRID */}
-      <section className="py-24 relative">
+      <section id="features" className="py-16 relative">
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Everything you need to excel</h2>
@@ -281,7 +290,7 @@ export const LandingPage: React.FC = () => {
               <FeatureCard
                 icon={<Clock size={28} />}
                 title="Focus Timer"
-                description="Built-in Pomodoro timer with customizable intervals to keep you focused and prevent burnout."
+                description="Built-in Pomodoro timer with long and short intervals to keep you focused and prevent burnout."
               />
             </FadeInSection>
             <FadeInSection delay={300}>
@@ -310,7 +319,7 @@ export const LandingPage: React.FC = () => {
       </section>
 
       {/* PRICING */}
-      <section className="py-24 bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-sm">
+      <section id="pricing" className="py-24 bg-slate-50/50 dark:bg-slate-950/50 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6">
           <FadeInSection>
             <div className="text-center mb-16">

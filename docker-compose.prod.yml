@@ -50,8 +50,11 @@ services:
       MYSQL_PASSWORD: pass
     ports:
       - "3307:3306"
+    mem_limit: 1024m
+    mem_reservation: 500m
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./mysql-lowmem.cnf:/etc/mysql/conf.d/mysql-lowmem.cnf
     networks:
       - hackathon-net
 
