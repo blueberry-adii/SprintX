@@ -68,9 +68,9 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-100px)]">
+    <div className="flex flex-col lg:flex-row gap-6 h-auto lg:h-[calc(100vh-100px)]">
       {/* Sidebar - History */}
-      <div className={`lg:w-80 flex-shrink-0 flex flex-col bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-black/20 overflow-hidden transition-all duration-300 ${showSidebar ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-0 lg:opacity-0 lg:p-0'}`}>
+      <div className={`lg:w-80 flex-shrink-0 flex flex-col bg-white dark:bg-slate-800 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-black/20 overflow-hidden transition-all duration-300 ${showSidebar ? 'block' : 'hidden lg:block lg:w-0 lg:opacity-0 lg:p-0 lg:border-0'}`}>
         <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
           <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <History size={20} className="text-[var(--primary-500)]" />
@@ -78,7 +78,7 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
           </h3>
           <span className="text-xs font-medium text-slate-400 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">{history.length}</span>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3 max-h-[300px] lg:max-h-none">
           {history.length === 0 ? (
             <div className="text-center text-slate-400 py-8 text-sm">
               No history yet. Generate your first insight!
@@ -87,7 +87,11 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
             history.map((item, idx) => (
               <button
                 key={item.id || idx}
-                onClick={() => setSelectedInsight(item)}
+                onClick={() => {
+                  setSelectedInsight(item);
+                  // On mobile, close sidebar after selection
+                  if (window.innerWidth < 1024) setShowSidebar(false);
+                }}
                 className={`w-full text-left p-4 rounded-2xl transition-all border ${selectedInsight === item
                   ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/20 border-[var(--primary-200)] dark:border-[var(--primary-700)] shadow-sm'
                   : 'bg-slate-50 dark:bg-slate-700/30 border-transparent hover:bg-slate-100 dark:hover:bg-slate-700'}`}
@@ -113,8 +117,8 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-3xl p-8 text-white shadow-xl shadow-violet-200 dark:shadow-none relative overflow-hidden flex-shrink-0 mb-6">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-[500px]">
+        <div className="bg-gradient-to-r from-violet-600 to-fuchsia-600 rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-violet-200 dark:shadow-none relative overflow-hidden flex-shrink-0 mb-6">
           <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-white opacity-10 rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-black opacity-10 rounded-full blur-2xl"></div>
 
@@ -129,17 +133,17 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 w-full md:w-auto">
               <button
                 onClick={() => setShowSidebar(!showSidebar)}
-                className="lg:hidden bg-white/20 hover:bg-white/30 text-white p-3 rounded-xl transition-all"
+                className="lg:hidden bg-white/20 hover:bg-white/30 text-white p-3 rounded-xl transition-all flex-shrink-0"
               >
                 <History size={20} />
               </button>
               <button
                 onClick={handleGenerate}
                 disabled={loading}
-                className="bg-white text-violet-700 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-violet-50 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 whitespace-nowrap"
+                className="flex-1 md:flex-none justify-center bg-white text-violet-700 px-6 py-3 rounded-xl font-bold shadow-lg hover:bg-violet-50 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed active:scale-95 whitespace-nowrap"
               >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : <Brain size={18} />}
                 {loading ? 'Analyzing...' : 'New Insight'}
@@ -150,9 +154,9 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
 
         <div className="flex-1 overflow-y-auto pr-2">
           {selectedInsight ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in pb-6">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 animate-fade-in pb-6">
               {/* Insights Column */}
-              <div className="lg:col-span-1 space-y-6">
+              <div className="xl:col-span-1 space-y-6">
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
                   <h3 className="font-bold text-slate-800 dark:text-white mb-6 flex items-center gap-2">
                     <div className="p-2 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-300 rounded-lg"><Brain size={20} /></div>
@@ -182,7 +186,7 @@ export const AIPlanner: React.FC<AIPlannerProps> = ({ tasks, logs, profile }) =>
               </div>
 
               {/* Schedule Column */}
-              <div className="lg:col-span-2">
+              <div className="xl:col-span-2">
                 <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-100 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-black/20">
                   <h3 className="font-bold text-slate-800 dark:text-white mb-8 flex items-center gap-3">
                     <div className="p-2 bg-[var(--primary-100)] dark:bg-[var(--primary-900)]/30 text-[var(--primary-600)] dark:text-[var(--primary-300)] rounded-lg"><Calendar size={20} /></div>

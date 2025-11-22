@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { RoutineLog, Task } from '../types';
+import { RoutineLog, Task, DashboardStats } from '../types';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, Legend, AreaChart, Area
@@ -10,9 +10,10 @@ interface DashboardProps {
   logs: RoutineLog[];
   tasks: Task[];
   userName: string;
+  stats?: DashboardStats | null;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName, stats }) => {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => {
     const today = new Date(Date.now());
     const day = today.getDay();
@@ -100,10 +101,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName }) =
     <div className="space-y-8 animate-fade-in">
 
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-[var(--primary-700)] to-[var(--primary-500)] rounded-3xl p-8 text-white shadow-xl shadow-[var(--primary-600)]/20 relative overflow-hidden transition-transform hover:scale-[1.01] duration-500">
+      <div className="bg-gradient-to-r from-[var(--primary-700)] to-[var(--primary-500)] rounded-3xl p-6 md:p-8 text-white shadow-xl shadow-[var(--primary-600)]/20 relative overflow-hidden transition-transform hover:scale-[1.01] duration-500">
         <div className="relative z-10">
-          <h2 className="text-3xl font-bold mb-2">{greeting}, {firstName}!</h2>
-          <p className="text-[var(--primary-50)] max-w-xl text-lg opacity-90">
+          <h2 className="text-2xl md:text-3xl font-bold mb-2">{greeting}, {firstName}!</h2>
+          <p className="text-[var(--primary-50)] max-w-xl text-base md:text-lg opacity-90">
             You've got {completionStats[1].value} pending tasks today. Ready to make some progress?
           </p>
         </div>
@@ -126,7 +127,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName }) =
             <ChevronRight size={20} />
           </button>
         </div>
-        <div className="grid grid-cols-7 p-4 gap-2 text-center">
+        <div className="grid grid-cols-7 gap-1 p-2 sm:gap-2 sm:p-4">
           {weeklyData.map((day, idx) => {
             const today = new Date();
             const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
@@ -134,9 +135,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName }) =
             const isToday = todayStr === dayStr;
 
             return (
-              <div key={idx} className={`flex flex-col items-center gap-2 p-3 rounded-2xl transition-all duration-300 ${isToday ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/20 ring-1 ring-[var(--primary-200)] shadow-sm scale-105' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:scale-105'}`}>
+              <div key={idx} className={`flex flex-col items-center gap-1 sm:gap-2 p-1 sm:p-3 rounded-2xl transition-all duration-300 ${isToday ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-600)]/20 ring-1 ring-[var(--primary-200)] shadow-sm scale-105' : 'hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:scale-105'}`}>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{day.dayName}</span>
-                <div className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold transition-all ${day.hasLog ? 'bg-[var(--primary-100)] text-[var(--primary-700)]' : 'text-slate-600 dark:text-slate-400'} ${isToday ? 'bg-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-200)] dark:shadow-none' : ''}`}>
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-xs sm:text-sm font-bold transition-all ${day.hasLog ? 'bg-[var(--primary-100)] text-[var(--primary-700)]' : 'text-slate-600 dark:text-slate-400'} ${isToday ? 'bg-[var(--primary-600)] text-white shadow-lg shadow-[var(--primary-200)] dark:shadow-none' : ''}`}>
                   {day.dateDisplay}
                 </div>
                 <div className={`w-1.5 h-1.5 rounded-full ${day.hasLog ? 'bg-[var(--primary-400)]' : 'bg-transparent'}`}></div>
@@ -180,19 +181,26 @@ export const Dashboard: React.FC<DashboardProps> = ({ logs, tasks, userName }) =
 
         <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-md transition-all duration-300 hover:-translate-y-1 group">
           <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-110 transition-transform duration-300">
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
               <TrendingUp size={24} />
             </div>
-            <h3 className="text-slate-500 dark:text-slate-400 text-sm font-bold uppercase tracking-wide">Productivity</h3>
+            <h3 className="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-bold uppercase tracking-wide truncate">Productivity</h3>
           </div>
-          <p className="text-4xl font-bold text-slate-800 dark:text-white">Top 12%</p>
-          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-md mt-2 inline-block">
-            ↑ Rising trend
-          </span>
+          <p className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white truncate">
+            {stats ? `${stats.productivity_score}%` : '0%'}
+          </p>
+          <div className="mt-2 flex flex-wrap">
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-md inline-block ${stats && stats.productivity_change >= 0
+              ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+              : 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20'
+              }`}>
+              {stats && stats.productivity_change >= 0 ? '↑' : '↓'} {stats ? Math.abs(stats.productivity_change) : 0}% vs last week
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         {/* Study vs Screen Time Chart */}
         <div className="bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700 transition-colors">
           <div className="flex justify-between items-center mb-8">

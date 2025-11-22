@@ -64,19 +64,19 @@ export const RoutineLogger: React.FC<RoutineLoggerProps> = ({ logs, addLog }) =>
           {/* Mood Selector - Visual */}
           <div>
             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">How did you feel today?</label>
-            <div className="flex justify-between gap-3">
+            <div className="grid grid-cols-5 gap-2 md:gap-3">
               {moodOptions.map((option) => (
                 <button
                   key={option.value}
                   type="button"
                   onClick={() => setLogData({ ...logData, moodRating: option.value })}
-                  className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all duration-200 active:scale-95 hover:shadow-md ${logData.moodRating === option.value
+                  className={`flex flex-col items-center gap-1 md:gap-2 p-2 md:p-4 rounded-2xl border transition-all duration-200 active:scale-95 hover:shadow-md ${logData.moodRating === option.value
                     ? 'bg-[var(--primary-50)] dark:bg-[var(--primary-900)]/30 border-[var(--primary-500)] shadow-md scale-105'
                     : 'bg-white dark:bg-slate-700 border-slate-100 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 hover:scale-105'
                     }`}
                 >
-                  <span className="text-2xl filter drop-shadow-sm transition-transform hover:scale-110" role="img" aria-label={option.label}>{option.emoji}</span>
-                  <span className={`text-[10px] font-bold uppercase tracking-wide ${logData.moodRating === option.value ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)]' : 'text-slate-400'}`}>
+                  <span className="text-xl md:text-2xl filter drop-shadow-sm transition-transform hover:scale-110" role="img" aria-label={option.label}>{option.emoji}</span>
+                  <span className={`text-[8px] md:text-[10px] font-bold uppercase tracking-wide truncate w-full text-center ${logData.moodRating === option.value ? 'text-[var(--primary-700)] dark:text-[var(--primary-300)]' : 'text-slate-400'}`}>
                     {option.label}
                   </span>
                 </button>

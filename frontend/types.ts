@@ -56,3 +56,15 @@ export interface AIAnalysisResult {
   suggestedSchedule: { time: string; activity: string; note?: string }[];
   productivityScore: number;
 }
+
+export interface DashboardStats {
+  first_name: string;
+  total_tasks: number;
+  completed_tasks: number;
+  avg_study_hours: number;
+  productivity_score: number;
+  productivity_change: number;
+  study_past_7_days: { date: string; study_hours: number }[];
+  screen_past_7_days: { date: string; screen_hours: number }[];
+  wellbeing_past_7_days: { date: string; wellbeing_score: number }[];
+}

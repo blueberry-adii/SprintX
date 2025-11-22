@@ -7,7 +7,7 @@ import { RoutineLogger } from './components/RoutineLogger';
 import { AIPlanner } from './components/AIPlanner';
 import { SettingsView } from './components/SettingsView';
 import { storageService } from './services/storageService';
-import { Task, RoutineLog, UserProfile } from './types';
+import { Task, RoutineLog, UserProfile, DashboardStats } from './types';
 import { Pencil, Save, X, Plus, Trash2, Upload, Loader2 } from 'lucide-react';
 import { AIAssistant } from './components/AIAssistant';
 import { PomodoroView } from './components/PomodoroView';
@@ -18,10 +18,15 @@ import { AuthPage } from './components/AuthPage';
 const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile: (p: UserProfile) => void }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(profile);
+  const [imgError, setImgError] = useState(false);
 
   useEffect(() => {
     setEditedProfile(profile);
   }, [profile]);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [editedProfile.profilePicture]);
 
   const handleSave = async () => {
     try {
@@ -91,11 +96,16 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
         )}
       </div>
 
-      <div className="flex items-center gap-6 mb-8">
-        <div className="relative group">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-8 text-center md:text-left">
+        <div className="relative group flex-shrink-0">
           <div className="w-24 h-24 bg-[var(--primary-100)] rounded-full flex items-center justify-center text-[var(--primary-600)] text-4xl font-bold overflow-hidden border-4 border-white dark:border-slate-700 shadow-md">
-            {editedProfile.profilePicture ? (
-              <img src={editedProfile.profilePicture} alt="Profile" className="w-full h-full object-cover" />
+            {editedProfile.profilePicture && !imgError && editedProfile.profilePicture !== "null" ? (
+              <img
+                src={editedProfile.profilePicture}
+                alt="Profile"
+                className="w-full h-full object-cover"
+                onError={() => setImgError(true)}
+              />
             ) : (
               (editedProfile.name || '?').charAt(0).toUpperCase()
             )}
@@ -108,7 +118,7 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
           )}
         </div>
 
-        <div className="flex-1">
+        <div className="flex-1 w-full">
           {isEditing ? (
             <div className="space-y-2">
               <label className="block text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Full Name</label>
@@ -116,7 +126,7 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
                 type="text"
                 value={editedProfile.name}
                 onChange={e => setEditedProfile({ ...editedProfile, name: e.target.value })}
-                className="text-3xl font-bold text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 focus:border-[var(--primary-600)] outline-none bg-transparent w-full py-1"
+                className="text-3xl font-bold text-slate-800 dark:text-white border-b-2 border-slate-200 dark:border-slate-700 focus:border-[var(--primary-600)] outline-none bg-transparent w-full py-1 text-center md:text-left"
                 placeholder="Enter your name"
               />
             </div>
@@ -166,7 +176,7 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
             <div className="bg-slate-50 dark:bg-slate-700/30 rounded-xl p-6 border border-slate-100 dark:border-slate-700">
               <ul className="space-y-3">
                 {profile.goals.map((g, i) => (
-                  <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-200">
+                  <li key={i} className="flex items-start gap-3 text-slate-700 dark:text-slate-200 text-left">
                     <div className="mt-1.5 w-2 h-2 bg-[var(--primary-500)] rounded-full flex-shrink-0 shadow-sm"></div>
                     <span className="leading-relaxed">{g}</span>
                   </li>
@@ -191,9 +201,9 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
           </div>
           <div className="grid gap-3">
             {editedProfile.examDates.map((exam, i) => (
-              <div key={i} className="flex justify-between items-center p-4 bg-white dark:bg-slate-700/30 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm group">
+              <div key={i} className="flex flex-col md:flex-row justify-between items-center p-4 bg-white dark:bg-slate-700/30 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm group gap-3">
                 {isEditing ? (
-                  <div className="flex-1 flex gap-3 items-center">
+                  <div className="flex-1 w-full flex flex-col md:flex-row gap-3 items-center">
                     <input
                       type="text"
                       placeholder="Subject"
@@ -203,31 +213,33 @@ const ProfileView = ({ profile, setProfile }: { profile: UserProfile, setProfile
                         newExams[i] = { ...newExams[i], subject: e.target.value };
                         setEditedProfile(prev => ({ ...prev, examDates: newExams }));
                       }}
-                      className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)]/20 outline-none bg-slate-50 dark:bg-slate-900 dark:text-white"
+                      className="w-full flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)]/20 outline-none bg-slate-50 dark:bg-slate-900 dark:text-white"
                     />
-                    <input
-                      type="date"
-                      value={exam.date}
-                      onChange={e => {
-                        const newExams = [...editedProfile.examDates];
-                        newExams[i] = { ...newExams[i], date: e.target.value };
-                        setEditedProfile(prev => ({ ...prev, examDates: newExams }));
-                      }}
-                      className="w-40 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)]/20 outline-none bg-slate-50 dark:bg-slate-900 dark:text-white"
-                    />
-                    <button
-                      onClick={() => setEditedProfile(prev => ({ ...prev, examDates: prev.examDates.filter((_, idx) => idx !== i) }))}
-                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                      title="Remove Exam"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="flex w-full md:w-auto gap-2">
+                      <input
+                        type="date"
+                        value={exam.date}
+                        onChange={e => {
+                          const newExams = [...editedProfile.examDates];
+                          newExams[i] = { ...newExams[i], date: e.target.value };
+                          setEditedProfile(prev => ({ ...prev, examDates: newExams }));
+                        }}
+                        className="flex-1 md:w-40 px-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-[var(--primary-500)]/20 outline-none bg-slate-50 dark:bg-slate-900 dark:text-white"
+                      />
+                      <button
+                        onClick={() => setEditedProfile(prev => ({ ...prev, examDates: prev.examDates.filter((_, idx) => idx !== i) }))}
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                        title="Remove Exam"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
                 ) : (
-                  <>
+                  <div className="w-full flex justify-between items-center">
                     <span className="font-medium text-slate-700 dark:text-slate-200">{exam.subject}</span>
                     <span className="px-3 py-1 bg-slate-100 dark:bg-slate-600 text-slate-600 dark:text-slate-300 text-sm rounded-full font-medium">{exam.date}</span>
-                  </>
+                  </div>
                 )}
               </div>
             ))}
@@ -254,6 +266,7 @@ const DashboardLayout: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [logs, setLogs] = useState<RoutineLog[]>([]);
   const [profile, setProfile] = useState<UserProfile>({ name: 'Guest Student', goals: [], examDates: [] });
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
 
   const [focusTask, setFocusTask] = useState<Task | null>(null);
 
@@ -262,14 +275,16 @@ const DashboardLayout: React.FC = () => {
     const init = async () => {
       setLoading(true);
       try {
-        const [t, l, p] = await Promise.all([
+        const [t, l, p, s] = await Promise.all([
           storageService.getTasks(),
           storageService.getLogs(),
-          storageService.getProfile()
+          storageService.getProfile(),
+          storageService.getDashboardStats()
         ]);
         setTasks(t);
         setLogs(l);
         setProfile(p);
+        setDashboardStats(s);
 
         // Apply settings from profile
         if (p.settings) {
@@ -338,7 +353,7 @@ const DashboardLayout: React.FC = () => {
       // Optimistic update
       setTasks(prev => prev.map(t => t.id === id ? updated : t));
       try {
-        await storageService.updateTask(updated);
+        await storageService.toggleTask(id, updated.completed);
       } catch (e) {
         console.error("Failed to toggle task", e);
       }
@@ -416,7 +431,7 @@ const DashboardLayout: React.FC = () => {
         </div>
       </div>
 
-      {currentTab === 'dashboard' && <Dashboard logs={logs} tasks={tasks} userName={profile.name} />}
+      {currentTab === 'dashboard' && <Dashboard logs={logs} tasks={tasks} userName={profile.name} stats={dashboardStats} />}
       {currentTab === 'tasks' && (
         <TaskManager
           tasks={tasks}

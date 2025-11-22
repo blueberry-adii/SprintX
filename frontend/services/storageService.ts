@@ -1,4 +1,4 @@
-import { Task, RoutineLog, UserProfile, Priority, Category } from '../types';
+import { Task, RoutineLog, UserProfile, Priority, Category, DashboardStats } from '../types';
 import { api } from './api';
 
 const TASKS_KEY = 'studentflow_tasks_v3';
@@ -145,6 +145,24 @@ export const storageService = {
     }
   },
 
+  toggleTask: async (id: string, isCompleted: boolean): Promise<Task> => {
+    try {
+      const endpoint = isCompleted ? `/tasks/${id}/complete` : `/tasks/${id}/uncomplete`;
+      const response = await api.patch(endpoint, {});
+      const updatedTask = mapTask(response.data);
+
+      // Update cache
+      const currentTasks = getFromCache<Task[]>(TASKS_KEY) || [];
+      const newTasks = currentTasks.map(t => t.id === id ? updatedTask : t);
+      saveToCache(TASKS_KEY, newTasks);
+
+      return updatedTask;
+    } catch (error) {
+      console.error('Failed to toggle task:', error);
+      throw error;
+    }
+  },
+
   deleteTask: async (id: string): Promise<void> => {
     try {
       await api.delete(`/tasks/${id}`);
@@ -250,7 +268,8 @@ export const storageService = {
       const profile: UserProfile = {
         name: data.full_name || data.name || 'Student',
         email: data.email,
-        profilePicture: data.pfp_url,
+        // Load PFP from local storage as requested (frontend-only persistence)
+        profilePicture: localStorage.getItem('studentflow_user_pfp') || data.pfp_url || '',
         goals: typeof data.academic_goals === 'string' ? JSON.parse(data.academic_goals) : (data.academic_goals || []),
         examDates: typeof data.upcoming_exams === 'string' ? JSON.parse(data.upcoming_exams) : (data.upcoming_exams || []),
         settings: {
@@ -269,12 +288,17 @@ export const storageService = {
 
   saveProfile: async (profile: UserProfile): Promise<UserProfile> => {
     try {
+      // Save PFP to local storage
+      if (profile.profilePicture) {
+        localStorage.setItem('studentflow_user_pfp', profile.profilePicture);
+      }
+
       // Map frontend camelCase to backend snake_case
       const backendProfile = {
         full_name: profile.name,
         academic_goals: profile.goals,
         upcoming_exams: profile.examDates,
-        pfp_url: profile.profilePicture
+        pfp_url: profile.profilePicture // Still sending to backend for sync if possible, but local takes precedence
         // settings are handled via separate endpoints
       };
 
@@ -324,6 +348,16 @@ export const storageService = {
       return theme;
     } catch (error) {
       console.error('Failed to change theme:', error);
+      throw error;
+    }
+  },
+
+  getDashboardStats: async (): Promise<DashboardStats> => {
+    try {
+      const response = await api.get('/dashboard');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch dashboard stats:', error);
       throw error;
     }
   }

@@ -70,11 +70,23 @@ export const getDashboard = async (
     .slice(7, 14)
     .reduce((s, r) => s + (r.study_hours || 0), 0);
 
-  let productivity = 0;
-  if (prev7Study === 0 && last7Study > 0) productivity = 100;
-  else if (prev7Study === 0) productivity = 0;
+  const avgWellbeing =
+    last7.length === 0
+      ? 0
+      : Number(
+        (
+          last7.reduce((sum, row) => sum + (row.wellbeing_score || 0), 0) /
+          last7.length
+        ).toFixed(1)
+      );
+
+  const productivityScore = Math.min(100, Math.round(avgWellbeing * 10));
+
+  let productivityChange = 0;
+  if (prev7Study === 0 && last7Study > 0) productivityChange = 100;
+  else if (prev7Study === 0) productivityChange = 0;
   else
-    productivity = Number(
+    productivityChange = Number(
       (((last7Study - prev7Study) / prev7Study) * 100).toFixed(2)
     );
 
@@ -101,7 +113,8 @@ export const getDashboard = async (
         total_tasks: taskStats.total_tasks,
         completed_tasks: taskStats.completed_tasks,
         avg_study_hours: avgStudy,
-        productivity_change: productivity,
+        productivity_score: productivityScore,
+        productivity_change: productivityChange,
         study_past_7_days: studyTrend,
         screen_past_7_days: screenTrend,
         wellbeing_past_7_days: wellbeingTrend,

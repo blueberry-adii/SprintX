@@ -232,7 +232,7 @@ export const TaskManager: React.FC<TaskManagerProps> = ({ tasks, onAddTask, onUp
             {/* Progress Hint Bar for non-completed */}
             {!task.completed && <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary-500)] rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>}
 
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-3 md:gap-5">
               <button onClick={() => onToggleTask(task.id)} className="text-slate-300 hover:text-[var(--primary-600)] transition-all duration-300 flex-shrink-0 active:scale-90">
                 {task.completed ? <CheckCircle className="text-emerald-500 animate-pop" size={26} /> : <Circle size={26} strokeWidth={2} className="hover:scale-110 transition-transform" />}
               </button>
