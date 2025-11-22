@@ -2,6 +2,8 @@
 
 StudentFlow is a comprehensive student productivity application designed to help students manage tasks, track daily routines, and gain insights into their study habits. It features a modern, responsive UI and a robust backend API.
 
+[Click here (Hosted on AWS EC2 t3.small)](http://)
+
 ## Local Setup
 
 To Try it on your local machine, refer this
@@ -64,6 +66,12 @@ SprintX/
 └── docker-compose.dev.yml  # Container orchestration
 ```
 
+## Note (**IMPORTANT**)
+
+- We had actually planned to include Redis (an in memory database) for caching data for faster data access, but due to time constraints we are caching the data in browser localstorage with an expiry of 15-20 seconds.
+
+- We had also deployed this project on AWS EC2 under the free tier model of t3.micro but as the limits of this model is 1 GB RAM, it crashed and now the website is hosted on t3.small which has constraints of 2 GB RAM. The server might have crashed due to less RAM under the free tier, so feel free to try this out locally
+
 ## Quick Start
 
 ### Prerequisites
@@ -104,3 +112,12 @@ SprintX/
 - [API Design](./docs/api-design.md)
 - [Database Schema](./docs/db-schema.md)
 - [Test Report](./docs/test_report.md)
+
+# Contributors
+
+AIML-3 3rd Sem BMSIT
+
+- Aditya Prasad
+- Mithare Aditya
+- Nyasha Chauhan
+- Nabiha Fathima
