@@ -16,7 +16,7 @@ import insightsRouter from "./routes/insights.route.js";
 import settingsRouter from "./routes/settings.route.js";
 
 const app = express();
-const PORT: number = Number(process.env.PORT) || 5000;
+const PORT = 5000;
 
 app.use(
   cors({
