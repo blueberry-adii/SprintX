@@ -116,6 +116,9 @@ SprintX/
 - [Setup Guide](./docs/setup.md)
 - [API Design](./docs/api-design.md)
 - [Database Schema](./docs/db-schema.md)
+- [AI Logic](./docs/ai-logic.md)
+- [Routine Flow](./docs/routine-flow.md)
+- [Task Scheduling](./docs/task-scheduling.md)
 - [Test Report](./docs/test_report.md)
 
 # Contributors
