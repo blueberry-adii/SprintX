@@ -125,12 +125,7 @@ SprintX/
 
 AIML-3, 3rd Sem BMSIT
 
-- Aditya Prasad -> (Team Lead, Fullstack Engineer, Basic DevOps, Team Coordinator and Debugger)
-  [LinkedIn](https://www.linkedin.com/in/aditya-prasad-095ab9329/)
-
-- Mithare Aditya -> (Frontend Engineer, Prompt Engineer, Debugger)
-  [LinkedIn](https://www.linkedin.com/in/aditya-mithare-52356a333/)
-- Nyasha Chauhan -> (UI Testing, API Testing, Server Testing, Unit testing, Docs manager)
-  [LinkedIn](https://www.linkedin.com/in/nyasha-chauhan-2a6935357/)
-- Nabiha Fathima -> (Frontend Engineer)
-  [LinkedIn](https://www.linkedin.com/in/nabiha-fathima-s-8b4670357/)
+- Aditya Prasad
+- Mithare Aditya
+- Nyasha Chauhan
+- Nabiha Fathima
